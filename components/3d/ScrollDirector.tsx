@@ -6,18 +6,18 @@ import { chapterIndex, setActiveChapter, worldState, type Chapter } from "@/lib/
 /** How much the world is shaded behind each chapter (0 = fully visible). */
 const DIM: Record<Chapter, number> = {
   hero: 0,
-  journey: 0.74,
-  stack: 0.5,
-  backend: 0.7,
-  build: 0.45,
-  systems: 0.72,
-  problems: 0.72,
-  architecture: 0.82,
-  principles: 0.7,
-  ai: 0.55,
-  experience: 0.75,
-  lab: 0.45,
-  contact: 0.42,
+  journey: 0.9,
+  stack: 0.88,
+  backend: 0.9,
+  build: 0.9,
+  systems: 0.9,
+  problems: 0.9,
+  architecture: 0.92,
+  principles: 0.88,
+  ai: 0.88,
+  experience: 0.92,
+  lab: 0.88,
+  contact: 0.7,
 };
 
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));

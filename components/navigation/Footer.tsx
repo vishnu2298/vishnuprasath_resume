@@ -1,13 +1,21 @@
+"use client";
+
 import { profile } from "@/data/profile";
+import { useMode } from "@/components/providers/ModeProvider";
 
 export function Footer() {
+  const { mode } = useMode();
+  const light = mode === "resume";
   return (
-    <footer data-print="hide" className="relative z-10 border-t border-white/[0.06] bg-ink pb-28 pt-10 lg:pb-10">
-      <div className="container-x flex flex-col justify-between gap-4 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-dim md:flex-row">
+    <footer
+      data-print="hide"
+      className={`relative z-10 border-t pb-28 pt-8 lg:pb-8 ${light ? "border-[#dde3e7] bg-[#eef1f3] text-[#6b7a85]" : "border-[var(--line)] bg-ink text-dim"}`}
+    >
+      <div className="container-x flex flex-col justify-between gap-2 text-[0.8rem] md:flex-row">
         <p>
           © {new Date().getFullYear()} {profile.name} · {profile.location}
         </p>
-        <p>Next.js · React Three Fiber · Built to load fast</p>
+        <p>Built with Next.js and React Three Fiber.</p>
       </div>
     </footer>
   );

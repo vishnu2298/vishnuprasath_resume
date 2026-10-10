@@ -9,18 +9,31 @@ import { subscribeChapter, worldState } from "@/lib/world";
  * - Visual chapters render at up to 60fps.
  * - Text-heavy chapters (world dimmed) render at 30fps.
  * - Paused entirely while an interactive section canvas is visible.
- * - Reduced motion: only re-render when the chapter changes.
+ * - Reduced motion: render a short burst of frames on load and on chapter change, nothing in between.
  */
 export function FrameDriver({ reducedMotion }: { reducedMotion: boolean }) {
   const invalidate = useThree((s) => s.invalidate);
 
   useEffect(() => {
     if (reducedMotion) {
-      invalidate();
-      const unsub = subscribeChapter(() => invalidate());
-      const onResize = () => invalidate();
+      // A short burst rather than one frame: the canvas sizes itself and draws its screen textures
+      // over the first few frames, and the camera needs a moment to settle on a new chapter.
+      let burstRaf = 0;
+      const burst = (frames = 24) => {
+        cancelAnimationFrame(burstRaf);
+        let i = 0;
+        const step = () => {
+          invalidate();
+          if (++i < frames) burstRaf = requestAnimationFrame(step);
+        };
+        step();
+      };
+      burst(60);
+      const unsub = subscribeChapter(() => burst());
+      const onResize = () => burst();
       window.addEventListener("resize", onResize);
       return () => {
+        cancelAnimationFrame(burstRaf);
         unsub();
         window.removeEventListener("resize", onResize);
       };

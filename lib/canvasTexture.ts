@@ -1,9 +1,7 @@
 import * as THREE from "three";
 
-export const ACCENT = "#ff5a1f";
-export const ACCENT_2 = "#ff3d2e";
-export const AMBER = "#ffb36b";
-export const INK = "#0b0b0e";
+export const ACCENT = "#63b7ae";
+export const ICE = "#a7c7d9";
 
 function fontFamily(kind: "mono" | "sans") {
   if (typeof window === "undefined") return kind === "mono" ? "monospace" : "sans-serif";
@@ -51,7 +49,7 @@ export function makeLabel(
     }
   }
   ctx.font = font;
-  ctx.fillStyle = opts.color ?? "#f2efe9";
+  ctx.fillStyle = opts.color ?? "#f1f2ee";
   ctx.textBaseline = "middle";
   ctx.fillText(text, pad, h / 2 + 2);
   return { texture: toTexture(canvas), aspect: w / h };
@@ -82,11 +80,11 @@ export function drawCode(
   ctx.textBaseline = "top";
   lines.slice(0, maxLines).forEach((line, i) => {
     const ly = y + i * size * lineHeight;
-    ctx.fillStyle = "rgba(255,255,255,0.22)";
+    ctx.fillStyle = "rgba(167,199,217,0.25)";
     ctx.fillText(String(i + 1).padStart(2, " "), x, ly);
     let cx = x + size * 2;
     if (line.trim().startsWith("//")) {
-      ctx.fillStyle = "rgba(255,255,255,0.35)";
+      ctx.fillStyle = "rgba(167,199,217,0.4)";
       ctx.fillText(line, cx, ly);
       return;
     }
@@ -95,9 +93,9 @@ export function drawCode(
     for (const p of parts) {
       if (!p) continue;
       if (KEYWORDS.test(p)) ctx.fillStyle = ACCENT;
-      else if (p.startsWith("'")) ctx.fillStyle = AMBER;
-      else if (/\w+\(/.test(p) || /\.\w+/.test(p)) ctx.fillStyle = "#f2efe9";
-      else ctx.fillStyle = "rgba(242,239,233,0.78)";
+      else if (p.startsWith("'")) ctx.fillStyle = ICE;
+      else if (/\w+\(/.test(p) || /\.\w+/.test(p)) ctx.fillStyle = "#f1f2ee";
+      else ctx.fillStyle = "rgba(241,242,238,0.75)";
       ctx.fillText(p, cx, ly);
       cx += ctx.measureText(p).width;
     }

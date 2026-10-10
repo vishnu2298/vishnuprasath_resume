@@ -20,24 +20,32 @@ export type Project = {
   problem?: string;
   built: string[];
   capabilitiesLabel?: string;
-  capabilities?: string[];
   tech: string[];
   architecture?: string[];
   example?: { prompt: string; steps: string[]; outcome?: string };
   challenge?: string;
   purpose?: string;
   footnote?: string;
+  /** Shown as a full case study with its own diagram. */
+  featured?: boolean;
+  /** The engineering decision that shaped the system — the part worth explaining. */
+  decision?: string;
+  /** Personal products: position on the Concept → Exploring → Building → Shipped track. */
+  labStage?: number;
 };
 
 export const projects: Project[] = [
   {
     id: "commerce",
     index: "01",
-    title: "AI-Powered Commerce Platform",
+    title: "Commerce platform backend",
     kind: "professional",
+    featured: true,
+    decision:
+      "Search, comparison, rewards and analytics were separated into focused services, so each could change and be released without touching the others.",
     status: "Professional Experience",
     summary:
-      "A large-scale commerce platform combining product discovery, product comparison, affiliate commerce, rewards, analytics and AI-powered product intelligence.",
+      "Backend services for a commerce platform that combines product discovery, comparison, affiliate commerce, rewards, analytics and AI-assisted product information.",
     role: "Backend Engineer / Technical Lead",
     built: [
       "Node.js APIs",
@@ -60,11 +68,14 @@ export const projects: Project[] = [
   {
     id: "recommendation",
     index: "02",
-    title: "AI Recommendation Engine",
+    title: "Recommendation engine",
     kind: "professional",
+    featured: true,
+    decision:
+      "Candidates come from inexpensive behaviour and product signals first; AI reranking only runs on the short list, and refreshes are scheduled instead of computed on every request.",
     status: "Professional Experience",
     summary:
-      "An intelligent recommendation system designed to provide personalized product recommendations based on user behavior and product signals.",
+      "Personalized product recommendations built from user behaviour, product relationships and trending signals.",
     role: "Recommendation architecture & implementation",
     built: [
       "Recommendation architecture",
@@ -90,11 +101,14 @@ export const projects: Project[] = [
   {
     id: "search",
     index: "03",
-    title: "Intelligent Product Search",
+    title: "Product search with model-level intent",
     kind: "professional",
+    featured: true,
+    decision:
+      "Detect the product and model in the query before matching, so a search for one specific model returns that model instead of everything that shares its name.",
     status: "Professional Experience",
     summary:
-      "A product search system designed to provide fresher and more relevant results by combining local product inventory with external search intelligence.",
+      "Fresher, more relevant product search that combines local inventory with external search results.",
     built: [
       "Exact product search",
       "Keyword matching",
@@ -116,11 +130,14 @@ export const projects: Project[] = [
   {
     id: "comparison",
     index: "04",
-    title: "AI Product Comparison System",
+    title: "Product comparison with background enrichment",
     kind: "professional",
+    featured: true,
+    decision:
+      "AI enrichment runs lazily in background workers and is cached, so a comparison response never waits on a model call.",
     status: "Professional Experience",
     summary:
-      "A product comparison system that combines merchant offers, affiliate links, pricing information and AI-generated product intelligence.",
+      "Comparison of merchant offers, prices and affiliate links, with AI-generated product insights added in the background.",
     built: [
       "Merchant & price comparison",
       "Affiliate conversion",
@@ -136,7 +153,7 @@ export const projects: Project[] = [
   {
     id: "data-platform",
     index: "05",
-    title: "Data Extraction & Searchable Data Platform",
+    title: "Data extraction & indexing platform",
     kind: "professional",
     status: "Professional Experience",
     summary:
@@ -152,7 +169,7 @@ export const projects: Project[] = [
   {
     id: "erp",
     index: "06",
-    title: "Enterprise ERP & Business Workflow Platform",
+    title: "ERP & business workflow platform",
     kind: "professional",
     status: "Selected Engineering Experience",
     summary:
@@ -176,7 +193,7 @@ export const projects: Project[] = [
   {
     id: "logistics",
     index: "07",
-    title: "Logistics / Tracking Platform",
+    title: "Logistics & tracking platform",
     kind: "professional",
     status: "Selected Engineering Experience",
     summary: "Systems designed around logistics and operational tracking.",
@@ -195,7 +212,7 @@ export const projects: Project[] = [
   {
     id: "fleet",
     index: "08",
-    title: "Fleet Management Platform",
+    title: "Fleet management platform",
     kind: "professional",
     status: "Selected Engineering Experience",
     summary: "Enterprise application supporting operational fleet-management workflows.",
@@ -217,7 +234,7 @@ export const projects: Project[] = [
   {
     id: "billing",
     index: "09",
-    title: "Customized Billing Platform",
+    title: "Client-specific billing platform",
     kind: "professional",
     status: "Selected Engineering Experience",
     summary: "Customized enterprise billing-oriented application workflows built around specific client requirements.",
@@ -237,8 +254,9 @@ export const projects: Project[] = [
   },
   {
     id: "investor",
+    labStage: 2,
     index: "10",
-    title: "AI Investor Intelligence Platform",
+    title: "Investor research assistant",
     kind: "product",
     status: "Currently Building",
     summary:
@@ -269,8 +287,9 @@ export const projects: Project[] = [
   },
   {
     id: "voice",
+    labStage: 1,
     index: "11",
-    title: "AI Voice Support Platform",
+    title: "Voice support platform",
     kind: "product",
     status: "Architecture / Product Exploration",
     summary: "A reusable, multi-tenant AI voice support platform concept.",
@@ -301,8 +320,9 @@ export const projects: Project[] = [
   },
   {
     id: "realestate",
+    labStage: 1.5,
     index: "12",
-    title: "AI-Powered Real Estate Platform",
+    title: "Property discovery",
     kind: "product",
     status: "Concept → Building",
     summary: "A personal product concept focused on simplifying property discovery and rental workflows.",
@@ -322,8 +342,9 @@ export const projects: Project[] = [
   },
   {
     id: "bizos",
+    labStage: 2,
     index: "13",
-    title: "Business Operating System",
+    title: "Business operating system",
     kind: "product",
     status: "Currently Building",
     summary:
@@ -340,82 +361,5 @@ export const projects: Project[] = [
     capabilitiesLabel: "Focus",
     tech: ["Node.js", "Multi-tenant", "AI assistance", "Cloud"],
     footnote: "Personal product initiative — ongoing.",
-  },
-];
-
-/** "More than APIs" — categories of systems built around real business problems. */
-export const capabilities = [
-  {
-    id: "commerce",
-    title: "Intelligent Commerce",
-    description:
-      "Built and enhanced systems around product discovery, product comparison, affiliate commerce, product intelligence, rewards and personalized shopping.",
-    listLabel: "Technologies",
-    items: ["Node.js", "MongoDB", "Elasticsearch", "AI", "SerpAPI", "Affiliate APIs"],
-  },
-  {
-    id: "reco",
-    title: "Recommendation Systems",
-    description:
-      "Designed recommendation workflows that combine user behavior, recent activity, product signals, trending products, deals and AI-based ranking.",
-    listLabel: "Capabilities",
-    items: [
-      "Cold-start recommendations",
-      "Personalization",
-      "Trending products",
-      "Product relationships",
-      "AI reranking",
-      "Behavior signals",
-      "Diversity & exploration",
-    ],
-  },
-  {
-    id: "search",
-    title: "Search Intelligence",
-    description:
-      "Improved product search by combining local inventory with fresh external search results and relevance-based matching.",
-    listLabel: "Capabilities",
-    items: [
-      "Exact keyword search",
-      "Product / model matching",
-      "Search freshness",
-      "Local inventory",
-      "External search APIs",
-      "Elasticsearch",
-      "Pagination",
-      "Relevance optimization",
-    ],
-  },
-  {
-    id: "ai",
-    title: "AI Product Intelligence",
-    description:
-      "Integrated AI into product workflows to enrich product information, generate insights and improve product comparison experiences.",
-    listLabel: "AI capabilities",
-    items: ["AI enrichment", "Product analysis", "Comparison insights", "AI scoring", "LLM integration", "Background processing"],
-  },
-  {
-    id: "automation",
-    title: "Business Automation",
-    description: "Built backend workflows that connect emails, APIs, databases, notifications and business processes.",
-    listLabel: "Examples",
-    items: [
-      "Email processing",
-      "OCR workflows",
-      "Push notifications",
-      "Analytics",
-      "Rewards",
-      "Referrals",
-      "Subscriptions",
-      "Automated business events",
-    ],
-  },
-  {
-    id: "enterprise",
-    title: "Enterprise Systems",
-    description:
-      "Built business applications and ERP-style systems involving workflows, users, permissions, APIs and operational data.",
-    listLabel: "Including",
-    items: ["ERP workflows", "Fleet management", "Custom billing", "Data extraction & indexing", "Roles & permissions"],
   },
 ];

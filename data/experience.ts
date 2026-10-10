@@ -82,28 +82,11 @@ export const leadership = {
   ],
 };
 
-/** Only claims that can be supported — no revenue, users or percentages. */
-export const metrics = [
-  { value: "7+", label: "Years", note: "Engineering experience" },
-  { value: "Multiple", label: "Production systems", note: "Built, maintained & debugged" },
-  { value: "AI", label: "In real products", note: "Integrated, not demoed" },
-  { value: "Microservices", label: "Architecture & migration", note: "Monolith → services" },
-  { value: "Search", label: "& recommendations", note: "Product intelligence" },
-  { value: "Full-stack", label: "Web + mobile", note: "Node.js · Angular · React Native" },
-];
-
-export type LabStatus = "BUILDING" | "EXPLORING" | "EXPERIMENT" | "CONCEPT";
-
-/** Stage index on a Concept → Exploring → Building → Shipped track. Nothing here is shipped. */
-export const labProjects: { title: string; status: LabStatus; statusText: string; stage: number; note: string }[] = [
-  { title: "AI Investor Intelligence", status: "BUILDING", statusText: "Building", stage: 2, note: "Research → qualify → personalize → human approval" },
-  { title: "Business Operating System", status: "BUILDING", statusText: "Building", stage: 2, note: "Multi-tenant workflows with AI assistance" },
-  { title: "AI Real Estate Platform", status: "CONCEPT", statusText: "Concept → Building", stage: 1.5, note: "Natural-language, location-aware property discovery" },
-  { title: "AI Voice Support", status: "EXPLORING", statusText: "Exploring", stage: 1, note: "Multi-tenant voice agent over business APIs" },
-  { title: "AI Automation", status: "EXPERIMENT", statusText: "Experiment", stage: 1, note: "Workflows that replace repeated manual steps" },
-  { title: "Recommendation Systems", status: "EXPERIMENT", statusText: "Experiment", stage: 1, note: "Signals, candidates and reranking ideas" },
-  { title: "Developer Productivity", status: "EXPLORING", statusText: "Exploring", stage: 1, note: "AI-assisted development workflows" },
-  { title: "AI-powered Workflows", status: "EXPLORING", statusText: "Exploring", stage: 1, note: "Agents connected to real systems" },
+/** Smaller experiments that sit alongside the personal products. None of these are shipped. */
+export const labExperiments: { title: string; note: string }[] = [
+  { title: "Workflow automation", note: "Agents and scripts that replace repeated manual steps in real systems." },
+  { title: "Recommendation experiments", note: "Signals, candidate generation and reranking ideas tried outside work." },
+  { title: "AI-assisted development", note: "Multi-agent setups for development, QA and product tasks." },
 ];
 
 export const labStages = ["Concept", "Exploring", "Building", "Shipped"];

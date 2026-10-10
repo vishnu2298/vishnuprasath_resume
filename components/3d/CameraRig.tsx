@@ -7,30 +7,31 @@ import { CHAPTERS, worldState, type Chapter } from "@/lib/world";
 
 type Key = { pos: [number, number, number]; look: [number, number, number] };
 
-/** Where the camera sits for each chapter of the page — one connected world. */
+/**
+ * Where the camera sits for each chapter — slow moves around one workstation.
+ * Most chapters are shaded behind text, so these are gentle changes of angle, not set pieces.
+ */
 const desktop: Record<Chapter, Key> = {
-  hero: { pos: [2.1, 1.8, 5.7], look: [-1.0, 1.2, 0] },
+  hero: { pos: [2.3, 1.75, 5.4], look: [-1.3, 1.15, 0] },
   journey: { pos: [0.95, 1.5, 2.1], look: [-0.45, 1.25, -0.4] },
-  stack: { pos: [0.6, 5.0, 1.6], look: [0.5, 6.5, -5] },
+  stack: { pos: [0.4, 3.3, 3.2], look: [0, 0.85, -0.2] },
   backend: { pos: [-1.8, 2.7, 3.3], look: [0.3, 1.0, -0.3] },
-  build: { pos: [-5.0, 2.3, 1.8], look: [-9, 2, -5] },
-  systems: { pos: [-6.6, 2.1, -0.4], look: [-9.6, 2, -6.2] },
+  build: { pos: [0.4, 1.8, 2.4], look: [2.7, 1.0, -2.5] },
+  systems: { pos: [0.4, 1.8, 2.4], look: [2.7, 1.0, -2.5] },
   problems: { pos: [-2.2, 3.6, 5.2], look: [0, 1, -2] },
   architecture: { pos: [0, 7, 6.5], look: [0, 1, -3] },
   principles: { pos: [3.2, 2.6, 4.2], look: [0, 1.2, 0] },
-  ai: { pos: [4.6, 2.7, 0.9], look: [8, 2.4, -5] },
+  ai: { pos: [1.6, 1.45, 1.7], look: [-0.3, 1.3, -0.3] },
   experience: { pos: [2.4, 1.8, 5.6], look: [-0.2, 1.15, 0] },
-  lab: { pos: [0, 2.3, -7.2], look: [0, 1.8, -13] },
-  contact: { pos: [0, 3.2, 9.8], look: [0, 1.7, -6] },
+  lab: { pos: [-1.2, 1.15, 1.7], look: [0.4, 0.95, -0.4] },
+  contact: { pos: [0.2, 2.6, 8.4], look: [0, 1.1, -2] },
 };
 
 /** Portrait screens: keep the scene in the upper half so hero text below stays clear. */
 const portraitOverrides: Partial<Record<Chapter, Key>> = {
-  hero: { pos: [0.75, 2.3, 9.4], look: [0.9, -0.75, 0] },
+  hero: { pos: [1.2, 1.9, 6.8], look: [0.45, -0.35, 0] },
   journey: { pos: [0.6, 1.6, 3.4], look: [0, 1.0, -0.4] },
-  ai: { pos: [6.2, 2.6, 2.6], look: [8, 2.0, -5] },
-  lab: { pos: [0, 2.4, -5.6], look: [0, 1.4, -13] },
-  contact: { pos: [0, 3.6, 13], look: [0, 1.4, -6] },
+  contact: { pos: [0.2, 3.0, 11], look: [0, 1.0, -2] },
 };
 
 const tmpPos = new THREE.Vector3();

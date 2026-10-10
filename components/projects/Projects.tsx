@@ -4,52 +4,59 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, X } from "lucide-react";
 import { projects, type Project } from "@/data/projects";
 import { Flow } from "@/components/ui/Flow";
-import { TiltCard } from "@/components/ui/TiltCard";
+import { Reveal } from "@/components/ui/Reveal";
 import { StatusBadge } from "./StatusBadge";
 
-type Filter = "all" | "professional" | "product";
-const filters: { id: Filter; label: string }[] = [
-  { id: "all", label: "All systems" },
-  { id: "professional", label: "Professional" },
-  { id: "product", label: "Products I'm building" },
-];
-
-function ProjectCard({ p, onOpen }: { p: Project; onOpen: () => void }) {
+/** The diagram that belongs to one project: its architecture, or a worked example of its behaviour. */
+function ProjectDiagram({ p }: { p: Project }) {
+  if (p.example) {
+    return (
+      <figure className="panel p-6 md:p-8">
+        <figcaption className="eyebrow mb-5">Worked example</figcaption>
+        <p className="mb-6 font-mono text-[0.95rem] text-ice">
+          query: <span className="text-fg">“{p.example.prompt}”</span>
+        </p>
+        <Flow steps={p.example.steps} direction="vertical" highlightLast label={`${p.title} example`} />
+        {p.example.outcome && <p className="mt-6 border-t border-[var(--line)] pt-5 text-sm leading-relaxed text-muted">{p.example.outcome}</p>}
+      </figure>
+    );
+  }
+  if (!p.architecture) return null;
   return (
-    <TiltCard className="group panel panel-hover h-full rounded-[18px]" max={4}>
-      <article className="flex h-full flex-col p-6 md:p-7">
-        <div className="flex items-center justify-between gap-3">
-          <span className="font-mono text-xs text-accent">{p.index}</span>
-          <StatusBadge status={p.status} />
-        </div>
-        <h3 className="heading mt-6 text-[1.45rem] md:text-[1.65rem]">{p.title}</h3>
-        <p className="mt-3 text-[0.92rem] leading-relaxed text-muted">{p.summary}</p>
-        {p.architecture && (
-          <div className="mt-5 hidden md:block">
-            <Flow steps={p.architecture.slice(0, 4).concat(p.architecture.length > 4 ? ["…"] : [])} size="sm" label={`${p.title} architecture preview`} />
-          </div>
-        )}
-        <ul className="mt-auto flex flex-wrap gap-1.5 pt-6" aria-label="Technologies">
-          {p.tech.slice(0, 5).map((t) => (
-            <li key={t} className="chip text-[0.64rem]">
-              {t}
-            </li>
-          ))}
-        </ul>
-        <button
-          onClick={onOpen}
-          className="mt-6 inline-flex items-center gap-2 self-start font-mono text-[0.7rem] uppercase tracking-[0.18em] text-fg transition-colors hover:text-accent"
-          aria-haspopup="dialog"
-        >
-          View system <ArrowUpRight size={14} aria-hidden />
-          <span className="sr-only">: {p.title}</span>
-        </button>
-      </article>
-    </TiltCard>
+    <figure className="panel p-6 md:p-8">
+      <figcaption className="eyebrow mb-5">{p.id === "recommendation" ? "Recommendation pipeline" : "Request path"}</figcaption>
+      <Flow steps={p.architecture} direction="vertical" highlightLast label={`${p.title} architecture`} />
+    </figure>
   );
 }
 
-function ProjectDialog({ project, onClose }: { project: Project | null; onClose: () => void }) {
+function CaseStudy({ p, flip, onOpen }: { p: Project; flip: boolean; onOpen: () => void }) {
+  return (
+    <article className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
+      <Reveal className={flip ? "lg:order-2" : ""}>
+        <p className="font-mono text-xs text-dim">{p.index}</p>
+        <h3 className="heading mt-3 text-[clamp(1.7rem,3vw,2.4rem)]">{p.title}</h3>
+        <p className="mt-4 text-lg leading-relaxed text-muted">{p.summary}</p>
+        {p.decision && (
+          <div className="mt-8 border-l-2 border-accent pl-5">
+            <p className="text-sm text-dim">The decision that shaped it</p>
+            <p className="mt-1 leading-relaxed text-fg">{p.decision}</p>
+          </div>
+        )}
+        <p className="mt-8 text-sm text-fg/80">{p.tech.join(" · ")}</p>
+        <button onClick={onOpen} aria-haspopup="dialog" className="link mt-6 inline-flex items-center gap-1.5 text-[0.95rem]">
+          Everything I worked on <ArrowUpRight size={15} aria-hidden />
+          <span className="sr-only">: {p.title}</span>
+        </button>
+      </Reveal>
+      <Reveal delay={0.1} className={flip ? "lg:order-1" : ""}>
+        <ProjectDiagram p={p} />
+      </Reveal>
+    </article>
+  );
+}
+
+export function ProjectDialog({ project, onClose }: { project: Project | null; onClose: () => void }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const d = ref.current;
@@ -64,21 +71,25 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
       onClose={onClose}
       onClick={(e) => e.target === ref.current && onClose()}
       aria-labelledby="project-dialog-title"
-      className="m-auto w-[min(56rem,calc(100vw-1.5rem))] rounded-3xl border border-white/10 bg-ink-2 p-0 text-fg backdrop:bg-black/75 backdrop:backdrop-blur-sm"
+      className="m-auto w-[min(52rem,calc(100vw-1.5rem))] rounded-2xl border border-[var(--line-strong)] bg-surface p-0 text-fg shadow-2xl backdrop:bg-[#0a1015]/75 backdrop:backdrop-blur-sm"
     >
       {project && (
         <div className="max-h-[85svh] overflow-y-auto p-6 md:p-10">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex flex-wrap items-center gap-3">
-                <span className="font-mono text-xs text-accent">{project.index}</span>
+                <span className="font-mono text-xs text-dim">{project.index}</span>
                 <StatusBadge status={project.status} />
               </div>
-              <h3 id="project-dialog-title" className="heading mt-4 text-[clamp(1.7rem,4vw,2.8rem)]">
+              <h3 id="project-dialog-title" className="heading mt-4 text-[clamp(1.6rem,3.6vw,2.4rem)]">
                 {project.title}
               </h3>
             </div>
-            <button onClick={onClose} aria-label="Close" className="rounded-full border border-white/10 p-2 text-muted hover:border-accent hover:text-fg">
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="rounded-lg border border-[var(--line-strong)] p-2 text-muted transition-colors hover:border-accent hover:text-fg"
+            >
               <X size={18} />
             </button>
           </div>
@@ -86,40 +97,30 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
           <p className="mt-5 max-w-3xl text-lg leading-relaxed text-muted">{project.summary}</p>
 
           <dl className="mt-8 grid gap-6 md:grid-cols-2">
-            {project.role && (
-              <div>
-                <dt className="eyebrow mb-2">My role</dt>
-                <dd>{project.role}</dd>
-              </div>
-            )}
-            {project.problem && (
-              <div>
-                <dt className="eyebrow mb-2">Problem</dt>
-                <dd className="text-fg/90">{project.problem}</dd>
-              </div>
-            )}
-            {project.challenge && (
-              <div>
-                <dt className="eyebrow mb-2">Engineering challenge</dt>
-                <dd className="text-fg/90">{project.challenge}</dd>
-              </div>
-            )}
-            {project.purpose && (
-              <div>
-                <dt className="eyebrow mb-2">Purpose</dt>
-                <dd className="text-fg/90">{project.purpose}</dd>
-              </div>
-            )}
+            {[
+              ["My role", project.role],
+              ["Problem", project.problem],
+              ["Engineering challenge", project.challenge],
+              ["Decision", project.decision],
+              ["Purpose", project.purpose],
+            ]
+              .filter(([, v]) => v)
+              .map(([k, v]) => (
+                <div key={k}>
+                  <dt className="text-sm text-dim">{k}</dt>
+                  <dd className="mt-1 text-fg/90">{v}</dd>
+                </div>
+              ))}
           </dl>
 
           <div className="mt-8">
-            <p className="eyebrow mb-3">
+            <p className="text-sm text-dim">
               {project.capabilitiesLabel ?? (project.kind === "professional" ? "What I worked on" : "Capabilities")}
             </p>
-            <ul className="grid gap-x-6 gap-y-2 text-[0.95rem] text-fg/85 sm:grid-cols-2">
+            <ul className="mt-3 grid gap-x-6 gap-y-2 text-[0.95rem] text-fg/85 sm:grid-cols-2">
               {project.built.map((b) => (
                 <li key={b} className="flex gap-3">
-                  <span aria-hidden className="mt-2 h-1 w-1 shrink-0 rounded-full bg-accent" />
+                  <span aria-hidden className="mt-[0.6rem] h-px w-3 shrink-0 bg-accent" />
                   {b}
                 </li>
               ))}
@@ -128,36 +129,33 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
 
           {project.architecture && (
             <div className="mt-8">
-              <p className="eyebrow mb-3">{project.kind === "product" && project.id === "investor" ? "Workflow" : "Architecture"}</p>
+              <p className="mb-3 text-sm text-dim">{project.id === "investor" ? "Workflow" : "Architecture"}</p>
               <Flow steps={project.architecture} highlightLast label={`${project.title} architecture`} />
             </div>
           )}
 
           {project.example && (
-            <div className="mt-8 rounded-2xl border border-white/[0.08] bg-black/30 p-5">
-              <p className="eyebrow mb-3">Example</p>
-              <p className="mb-4 font-mono text-sm text-amber">“{project.example.prompt}”</p>
+            <div className="mt-8 rounded-xl border border-[var(--line)] bg-ink/40 p-5">
+              <p className="mb-3 text-sm text-dim">Example</p>
+              <p className="mb-4 font-mono text-sm text-ice">“{project.example.prompt}”</p>
               <Flow steps={project.example.steps} size="sm" highlightLast label="Example flow" />
               {project.example.outcome && <p className="mt-4 text-sm text-muted">{project.example.outcome}</p>}
             </div>
           )}
 
-          <div className="mt-8">
-            <p className="eyebrow mb-3">Technology</p>
-            <ul className="flex flex-wrap gap-2">
-              {project.tech.map((t) => (
-                <li key={t} className="chip">
-                  {t}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ul className="mt-8 flex flex-wrap gap-2" aria-label="Technology">
+            {project.tech.map((t) => (
+              <li key={t} className="chip">
+                {t}
+              </li>
+            ))}
+          </ul>
 
-          <p className="mt-8 border-t border-white/[0.06] pt-5 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-dim">
+          <p className="mt-8 border-t border-[var(--line)] pt-5 text-xs text-dim">
             {project.footnote ??
               (project.kind === "professional"
                 ? "Client and product names are kept confidential. No metrics are claimed."
-                : "Personal product work — status shown as-is, not represented as a finished production system.")}
+                : "Personal product work — shown at its real stage, not presented as a finished production system.")}
           </p>
         </div>
       )}
@@ -166,37 +164,42 @@ function ProjectDialog({ project, onClose }: { project: Project | null; onClose:
 }
 
 export function Projects() {
-  const [filter, setFilter] = useState<Filter>("all");
   const [open, setOpen] = useState<Project | null>(null);
-  const list = projects.filter((p) => filter === "all" || p.kind === filter);
+  const featured = projects.filter((p) => p.featured);
+  const rest = projects.filter((p) => p.kind === "professional" && !p.featured);
 
   return (
     <div>
-      <div role="group" aria-label="Filter systems" className="mb-8 flex flex-wrap gap-2">
-        {filters.map((f) => (
-          <button
-            key={f.id}
-            aria-pressed={filter === f.id}
-            onClick={() => setFilter(f.id)}
-            className={`rounded-full border px-4 py-2 font-mono text-[0.7rem] uppercase tracking-[0.16em] transition-colors ${
-              filter === f.id ? "border-fg bg-fg text-ink" : "border-white/15 text-muted hover:border-white/40 hover:text-fg"
-            }`}
-          >
-            {f.label}
-            <span className="ml-2 opacity-60">{projects.filter((p) => f.id === "all" || p.kind === f.id).length}</span>
-          </button>
+      <div className="flex flex-col gap-24 md:gap-32">
+        {featured.map((p, i) => (
+          <CaseStudy key={p.id} p={p} flip={i % 2 === 1} onOpen={() => setOpen(p)} />
         ))}
       </div>
 
-      {/* Swipeable rail on mobile, grid from md up. */}
-      <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 md:mx-0 md:grid md:grid-cols-2 md:overflow-visible md:px-0 xl:grid-cols-3">
-        {list.map((p) => (
-          <li key={p.id} className="w-[85%] shrink-0 snap-center md:w-auto">
-            <ProjectCard p={p} onOpen={() => setOpen(p)} />
-          </li>
-        ))}
-      </ul>
-      <p className="mt-2 font-mono text-[0.62rem] uppercase tracking-[0.18em] text-dim md:hidden">Swipe → {list.length} systems</p>
+      <div className="mt-28">
+        <Reveal className="mb-6 flex flex-wrap items-baseline justify-between gap-3">
+          <h3 className="heading text-2xl">Earlier enterprise work</h3>
+          <p className="text-sm text-dim">ERP, logistics, fleet and billing systems — the foundation for everything above.</p>
+        </Reveal>
+        <ul className="border-b border-[var(--line)]">
+          {rest.map((p) => (
+            <li key={p.id} className="rule-top">
+              <button
+                onClick={() => setOpen(p)}
+                aria-haspopup="dialog"
+                className="group grid w-full gap-x-8 gap-y-1 py-5 text-left transition-colors hover:bg-white/[0.02] md:grid-cols-[3rem_minmax(0,1.1fr)_minmax(0,1.4fr)_auto] md:items-baseline"
+              >
+                <span className="font-mono text-xs text-dim">{p.index}</span>
+                <span className="text-[1.05rem] font-medium text-fg">{p.title}</span>
+                <span className="text-sm text-muted">{p.summary}</span>
+                <span className="hidden items-center gap-1 text-sm text-muted transition-colors group-hover:text-accent md:flex">
+                  Details <ArrowUpRight size={14} aria-hidden />
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <ProjectDialog project={open} onClose={() => setOpen(null)} />
     </div>

@@ -1,96 +1,71 @@
-import { backendFlow, backendTech } from "@/data/stack";
-import { codeSnippets } from "@/data/code";
+"use client";
+
+import { useState } from "react";
+import { backendFlow } from "@/data/stack";
 import { Reveal } from "@/components/ui/Reveal";
 
-function Code({ lines, file }: { lines: string[]; file: string }) {
-  return (
-    <figure className="panel overflow-hidden">
-      <figcaption className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3 font-mono text-[0.68rem] text-dim">
-        <span>{file}</span>
-        <span className="text-accent">illustrative</span>
-      </figcaption>
-      <pre className="overflow-x-auto p-5 font-mono text-[0.8rem] leading-relaxed text-fg/85">
-        <code>
-          {lines.map((l, i) => (
-            <span key={i} className="block">
-              <span aria-hidden className="mr-4 inline-block w-4 select-none text-right text-dim">
-                {i + 1}
-              </span>
-              {highlight(l)}
-            </span>
-          ))}
-        </code>
-      </pre>
-    </figure>
-  );
-}
-
-function highlight(line: string) {
-  const parts = line.split(/(\b(?:const|await|async|return)\b|'[^']*')/g);
-  return parts.map((p, i) =>
-    /^(const|await|async|return)$/.test(p) ? (
-      <span key={i} className="text-accent">
-        {p}
-      </span>
-    ) : p.startsWith("'") ? (
-      <span key={i} className="text-amber">
-        {p}
-      </span>
-    ) : (
-      p
-    ),
-  );
-}
-
+/**
+ * The request path as a diagram you can interrogate: pick a layer, read the decision I make there.
+ * The travelling dot is the request; it pauses for reduced motion.
+ */
 export function BackendCore() {
+  const [active, setActive] = useState(0);
+  const step = backendFlow[active];
+
   return (
-    <div className="grid gap-10 lg:grid-cols-[1fr_1.05fr]">
-      {/* Request path */}
+    <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
       <Reveal>
-        <ol className="relative" aria-label="Request path through a backend system">
-          <div aria-hidden className="absolute bottom-6 left-[1.15rem] top-6 w-px bg-gradient-to-b from-white/20 via-accent/50 to-ember/70" />
-          <div aria-hidden className="request-pulse absolute left-[0.95rem] top-6 h-2.5 w-2.5 rounded-full bg-amber shadow-[0_0_18px_4px_rgba(255,140,60,0.6)]" />
-          {backendFlow.map((s, i) => (
-            <li key={s.label} className="relative flex items-center gap-5 py-2.5">
-              <span
-                className={`relative z-10 grid h-[2.3rem] w-[2.3rem] shrink-0 place-items-center rounded-full border font-mono text-[0.65rem] ${
-                  i === backendFlow.length - 1 ? "border-accent bg-accent text-ink" : "border-white/15 bg-ink-2 text-muted"
-                }`}
-              >
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div className="panel flex flex-1 items-center justify-between gap-4 px-5 py-3.5">
-                <span className="font-semibold">{s.label}</span>
-                <span className="text-right font-mono text-[0.68rem] uppercase tracking-[0.12em] text-dim">{s.note}</span>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <div className="panel p-4 md:p-6">
+          <p className="eyebrow mb-4 px-2">One request, eight layers</p>
+          <ol className="relative" aria-label="Request path through a backend system">
+            <div aria-hidden className="absolute bottom-7 left-[1.45rem] top-7 w-px bg-[var(--line-strong)]" />
+            <div
+              aria-hidden
+              className="request-pulse absolute left-[1.2rem] top-6 h-2 w-2 rounded-full bg-ice"
+              style={{ ["--travel" as string]: `calc(${backendFlow.length - 1} * 3.6rem)` }}
+            />
+            {backendFlow.map((s, i) => {
+              const on = i === active;
+              return (
+                <li key={s.label} className="relative">
+                  <button
+                    aria-pressed={on}
+                    onClick={() => setActive(i)}
+                    onMouseEnter={() => setActive(i)}
+                    onFocus={() => setActive(i)}
+                    className={`flex h-[3.6rem] w-full items-center gap-4 rounded-lg px-2 text-left transition-colors ${
+                      on ? "bg-accent/[0.09]" : "hover:bg-white/[0.03]"
+                    }`}
+                  >
+                    <span
+                      className={`relative z-10 grid h-7 w-7 shrink-0 place-items-center rounded-md border font-mono text-[0.65rem] ${
+                        on ? "border-accent bg-accent text-ink" : "border-[var(--line-strong)] bg-ink text-muted"
+                      }`}
+                    >
+                      {i + 1}
+                    </span>
+                    <span className={`flex-1 font-medium ${on ? "text-fg" : "text-fg/80"}`}>{s.label}</span>
+                    <span className="hidden text-right text-xs text-dim sm:block">{s.note}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
       </Reveal>
 
-      <div className="flex flex-col gap-6">
-        <Reveal delay={0.1}>
-          <Code lines={codeSnippets.route} file="routes/products.ts" />
-        </Reveal>
-        <div className="grid gap-6 sm:grid-cols-2">
-          <Reveal delay={0.15}>
-            <Code lines={codeSnippets.recommend} file="recommendation.ts" />
-          </Reveal>
-          <Reveal delay={0.2}>
-            <Code lines={codeSnippets.enrich} file="ai.service.ts" />
-          </Reveal>
+      <Reveal delay={0.1} className="lg:sticky lg:top-28 lg:self-start">
+        <div aria-live="polite">
+          <p className="text-sm text-accent">
+            Layer {active + 1} · {step.label}
+          </p>
+          <p className="heading mt-4 text-[clamp(1.5rem,2.6vw,2.1rem)] text-fg">{step.decision}</p>
         </div>
-        <Reveal delay={0.25} className="panel p-6">
-          <p className="eyebrow mb-4">Hands-on, in production work</p>
-          <ul className="flex flex-wrap gap-2">
-            {backendTech.map((t) => (
-              <li key={t} className="chip">
-                {t}
-              </li>
-            ))}
-          </ul>
-        </Reveal>
-      </div>
+        <p className="mt-10 border-t border-[var(--line)] pt-5 text-sm leading-relaxed text-muted">
+          Node.js · Express · Mongoose · Sequelize · MongoDB · PostgreSQL · MySQL · Elasticsearch · REST APIs — hands-on, in
+          production work.
+        </p>
+      </Reveal>
     </div>
   );
 }

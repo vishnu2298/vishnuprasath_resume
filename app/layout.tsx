@@ -1,12 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Newsreader } from "next/font/google";
 import "./globals.css";
 import { profile, site } from "@/data/profile";
 import { ModeProvider } from "@/components/providers/ModeProvider";
 import { MotionProvider } from "@/components/providers/MotionProvider";
 import { Nav } from "@/components/navigation/Nav";
 
-const archivo = Archivo({ subsets: ["latin"], axes: ["wdth"], variable: "--font-archivo", display: "swap" });
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  axes: ["opsz"],
+  style: ["normal", "italic"],
+  variable: "--font-newsreader",
+  display: "swap",
+});
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains", display: "swap" });
 
@@ -20,6 +26,7 @@ export const metadata: Metadata = {
   keywords: [
     "Software Engineer",
     "Backend Engineer",
+    "MEAN Stack Developer",
     "Technical Lead",
     "AI Integration",
     "Node.js",
@@ -51,7 +58,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#070709",
+  themeColor: "#101820",
   colorScheme: "dark",
   width: "device-width",
   initialScale: 1,
@@ -103,7 +110,7 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${inter.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${newsreader.variable} ${inter.variable} ${mono.variable}`} suppressHydrationWarning>
       <body className="grain min-h-screen">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <ModeProvider>

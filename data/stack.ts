@@ -45,16 +45,16 @@ export type GalaxyCategory =
   | "foundations";
 
 export const galaxyCategories: { id: GalaxyCategory; label: string; color: string }[] = [
-  { id: "backend", label: "Backend", color: "#ff6a2b" },
-  { id: "data", label: "Databases", color: "#ffb36b" },
-  { id: "search", label: "Search", color: "#ffd2a1" },
-  { id: "ai", label: "AI", color: "#ff3d2e" },
-  { id: "architecture", label: "Architecture", color: "#f08a5d" },
-  { id: "integrations", label: "Integrations", color: "#d9a07a" },
-  { id: "mobile", label: "Mobile", color: "#ff9a5c" },
-  { id: "devops", label: "DevOps", color: "#b8a59a" },
-  { id: "cloud", label: "Cloud / Services", color: "#c9bdb3" },
-  { id: "foundations", label: "Foundations", color: "#8f8a86" },
+  { id: "backend", label: "Backend", color: "#63b7ae" },
+  { id: "data", label: "Databases", color: "#a7c7d9" },
+  { id: "search", label: "Search", color: "#7aa3c8" },
+  { id: "ai", label: "AI", color: "#b7c79b" },
+  { id: "architecture", label: "Architecture", color: "#8fc6bd" },
+  { id: "integrations", label: "Integrations", color: "#cdbf9f" },
+  { id: "mobile", label: "Mobile", color: "#c3b6d6" },
+  { id: "devops", label: "DevOps", color: "#8d9fac" },
+  { id: "cloud", label: "Cloud / Services", color: "#b6c4cd" },
+  { id: "foundations", label: "Foundations", color: "#6f818d" },
 ];
 
 export type GalaxyNode = { id: string; label: string; category: GalaxyCategory; core?: boolean };
@@ -225,15 +225,54 @@ export const galaxyEdges: [string, string][] = [
   ["angular", "node"],
 ];
 
-export const backendTech = ["Node.js", "Express", "Mongoose", "Sequelize", "MongoDB", "PostgreSQL", "MySQL", "REST APIs"];
 
+/** The request path, with the decision I make at each layer. */
 export const backendFlow = [
-  { label: "Client", note: "Web / mobile / partner" },
-  { label: "API", note: "REST, validation, auth" },
-  { label: "Business Logic", note: "Rules, workflows, ownership" },
-  { label: "Services", note: "Focused, separable" },
-  { label: "MongoDB / PostgreSQL", note: "Source of truth" },
-  { label: "Elasticsearch", note: "Search & signals" },
-  { label: "External APIs", note: "Normalized integrations" },
-  { label: "AI Services", note: "Enrichment & ranking" },
+  {
+    label: "Client",
+    note: "Web, React Native, partners",
+    decision:
+      "Keep one versioned contract for web and mobile clients, so app releases — including CodePush updates — and backend deploys can move independently.",
+  },
+  {
+    label: "API",
+    note: "Validation, auth, limits",
+    decision:
+      "Validate and authenticate at the edge: token checks, OTP-based identity and input schemas, so business logic only ever sees trusted, well-formed requests.",
+  },
+  {
+    label: "Business logic",
+    note: "Rules, workflows, ownership",
+    decision: "Keep each rule in one place per domain. When two services need the same rule, the boundary between them is usually wrong.",
+  },
+  {
+    label: "Services",
+    note: "Focused, separable",
+    decision:
+      "Split by responsibility, not by table: search, recommendations, rewards and comparison each own their data and release on their own schedule.",
+  },
+  {
+    label: "MongoDB / PostgreSQL",
+    note: "Source of truth",
+    decision:
+      "Design schemas around the queries that matter, index for them, and let aggregation pipelines do the work instead of post-processing in application code.",
+  },
+  {
+    label: "Elasticsearch",
+    note: "Search & signals",
+    decision:
+      "Treat Elasticsearch as a read model, not the source of truth: indexes are rebuilt from the database, and mappings follow the searches people actually run.",
+  },
+  {
+    label: "External APIs",
+    note: "Normalised integrations",
+    decision:
+      "Put every external API behind an adapter that normalises its data, retries carefully and fails without taking the whole request down.",
+  },
+  {
+    label: "AI services",
+    note: "Enrichment & ranking",
+    decision:
+      "Keep model calls off the hot path where possible: enrich in background workers, cache the results, and fall back to non-AI behaviour when a model is slow.",
+  },
 ];

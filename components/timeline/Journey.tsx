@@ -2,132 +2,122 @@
 
 import { useRef, useState, type KeyboardEvent } from "react";
 import { AnimatePresence, m } from "framer-motion";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { journey } from "@/data/journey";
 import { Flow } from "@/components/ui/Flow";
 import { StageGlyph } from "./StageGlyph";
 
-/** "Engineering Evolution": an ARIA tab list where each stage is a node on a rail. */
+/** The progression as an ARIA tab list: a rail of six stages and one detail panel. */
 export function Journey() {
-  const [active, setActive] = useState(3);
+  const [active, setActive] = useState(0);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const stage = journey[active];
 
+  const go = (i: number, focus = false) => {
+    const n = (i + journey.length) % journey.length;
+    setActive(n);
+    if (focus) tabs.current[n]?.focus();
+  };
+
   const onKey = (e: KeyboardEvent) => {
-    const dir = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
     if (e.key === "Home" || e.key === "End") {
       e.preventDefault();
-      const i = e.key === "Home" ? 0 : journey.length - 1;
-      setActive(i);
-      tabs.current[i]?.focus();
+      go(e.key === "Home" ? 0 : journey.length - 1, true);
       return;
     }
+    const dir = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
     if (!dir) return;
     e.preventDefault();
-    const i = (active + dir + journey.length) % journey.length;
-    setActive(i);
-    tabs.current[i]?.focus();
+    go(active + dir, true);
   };
 
   return (
     <div>
       {/* Rail */}
-      <div className="relative">
-        <div aria-hidden className="absolute left-0 right-0 top-[52px] hidden h-px bg-gradient-to-r from-white/5 via-white/15 to-accent/60 md:block" />
-        <div
-          role="tablist"
-          aria-label="Career stages"
-          onKeyDown={onKey}
-          className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-5 md:gap-4 md:overflow-visible md:px-0"
-        >
-          {journey.map((s, i) => {
-            const on = i === active;
-            return (
-              <button
-                key={s.id}
-                ref={(el) => {
-                  tabs.current[i] = el;
-                }}
-                role="tab"
-                id={`stage-tab-${s.id}`}
-                aria-selected={on}
-                aria-controls={`stage-panel-${s.id}`}
-                tabIndex={on ? 0 : -1}
-                onClick={() => setActive(i)}
-                className={`group relative flex min-w-[9.5rem] snap-start flex-col items-center gap-3 rounded-2xl border px-3 pb-4 pt-3 text-center transition-colors duration-300 md:min-w-0 ${
-                  on ? "border-accent/50 bg-accent/[0.07]" : "border-white/[0.06] bg-ink-2/70 hover:border-white/20"
-                }`}
-              >
-                <span className="relative grid h-[76px] place-items-center">
-                  <StageGlyph stage={i} active={on} />
-                </span>
-                <span className={`font-mono text-[0.68rem] uppercase tracking-[0.2em] ${on ? "text-accent" : "text-dim"}`}>
-                  {s.period}
-                </span>
-                <span className={`text-sm font-semibold leading-tight ${on ? "text-fg" : "text-muted"}`}>{s.stage}</span>
-                {s.status === "current" && (
-                  <span className="absolute right-2 top-2 flex items-center gap-1.5 font-mono text-[0.55rem] uppercase tracking-[0.18em] text-accent">
-                    <span className="status-dot" aria-hidden /> Now
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+      <div
+        role="tablist"
+        aria-label="Career progression"
+        onKeyDown={onKey}
+        className="no-scrollbar -mx-4 flex snap-x snap-mandatory overflow-x-auto px-4 md:mx-0 md:grid md:grid-cols-6 md:overflow-visible md:px-0"
+      >
+        {journey.map((s, i) => {
+          const on = i === active;
+          const past = i < active;
+          return (
+            <button
+              key={s.id}
+              ref={(el) => {
+                tabs.current[i] = el;
+              }}
+              role="tab"
+              id={`stage-tab-${s.id}`}
+              aria-selected={on}
+              aria-controls={`stage-panel-${s.id}`}
+              tabIndex={on ? 0 : -1}
+              onClick={() => go(i)}
+              className={`group relative flex min-w-[10.5rem] snap-start flex-col items-start justify-start border-t-2 pb-2 pr-4 pt-5 text-left transition-colors duration-300 md:min-w-0 ${
+                on ? "border-accent" : past ? "border-accent/35" : "border-[var(--line-strong)] hover:border-ice/40"
+              }`}
+            >
+              <StageGlyph stage={i} active={on} />
+              <span className={`mt-3 block text-[0.75rem] ${on ? "text-accent" : "text-dim"}`}>
+                {String(i + 1).padStart(2, "0")} · {s.period}
+              </span>
+              <span className={`mt-1 block text-[0.98rem] leading-snug ${on ? "text-fg" : "text-muted group-hover:text-fg"}`}>{s.stage}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Panel */}
-      <div className="mt-6">
-        <AnimatePresence mode="wait">
-          <m.div
-            key={stage.id}
-            role="tabpanel"
-            id={`stage-panel-${stage.id}`}
-            aria-labelledby={`stage-tab-${stage.id}`}
-            tabIndex={0}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.45 }}
-            className="panel grid gap-8 p-6 md:grid-cols-[1.1fr_1fr] md:p-10"
-          >
-            <div>
-              <p className="eyebrow mb-3 text-accent">
-                {stage.period} · {stage.stage}
-              </p>
-              <h3 className="heading text-[clamp(1.6rem,3.2vw,2.5rem)]">{stage.title}</h3>
-              {stage.role && <p className="mt-2 font-mono text-xs uppercase tracking-[0.16em] text-muted">{stage.role}</p>}
-              <p className="mt-6 border-l-2 border-accent pl-4 text-lg italic text-fg/90">“{stage.label}”</p>
-              <ul className="mt-6 space-y-2.5 text-[0.95rem] text-muted">
-                {stage.points.map((p) => (
-                  <li key={p} className="flex gap-3">
-                    <span aria-hidden className="mt-2 h-1 w-1 shrink-0 rounded-full bg-accent" />
-                    {p}
-                  </li>
-                ))}
-              </ul>
+      <AnimatePresence mode="wait">
+        <m.div
+          key={stage.id}
+          role="tabpanel"
+          id={`stage-panel-${stage.id}`}
+          aria-labelledby={`stage-tab-${stage.id}`}
+          tabIndex={0}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.35 }}
+          className="mt-10 grid gap-12 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]"
+        >
+          <div>
+            <h3 className="heading text-[clamp(1.6rem,3vw,2.3rem)]">{stage.title}</h3>
+            {stage.role && <p className="mt-2 text-sm text-dim">{stage.role}</p>}
+            <p className="mt-6 text-lg italic text-ice">{stage.label}</p>
+            <ul className="mt-6 space-y-2.5 text-[0.98rem] leading-relaxed text-fg/85">
+              {stage.points.map((p) => (
+                <li key={p} className="flex gap-3">
+                  <span aria-hidden className="mt-[0.75rem] h-px w-3 shrink-0 bg-accent" />
+                  {p}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-7 text-sm text-muted">{stage.tech.join(" · ")}</p>
+            <div className="mt-8 flex gap-3">
+              <button onClick={() => go(active - 1)} disabled={active === 0} className="btn btn-ghost h-10 px-3 disabled:opacity-35" aria-label="Previous stage">
+                <ArrowLeft size={16} aria-hidden />
+              </button>
+              <button onClick={() => go(active + 1)} disabled={active === journey.length - 1} className="btn btn-ghost h-10 disabled:opacity-35">
+                {active < journey.length - 1 ? (
+                  <>
+                    Next: {journey[active + 1].stage} <ArrowRight size={16} aria-hidden />
+                  </>
+                ) : (
+                  "Current stage"
+                )}
+              </button>
             </div>
-            <div className="flex flex-col gap-8">
-              <div>
-                <p className="eyebrow mb-4">System at this stage</p>
-                <Flow steps={stage.flow} direction="vertical" highlightLast label={`${stage.stage} system flow`} />
-              </div>
-              <div>
-                <p className="eyebrow mb-3">Technology</p>
-                <ul className="flex flex-wrap gap-2" aria-label="Technologies">
-                  {stage.tech.map((t) => (
-                    <li key={t} className="chip">
-                      {t}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </m.div>
-        </AnimatePresence>
-        <p className="mt-4 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-dim">
-          Years mark career stages, not exact technology adoption dates.
-        </p>
-      </div>
+          </div>
+          <figure className="panel self-start p-6 md:p-8">
+            <figcaption className="eyebrow mb-5">The system at this stage</figcaption>
+            <Flow steps={stage.flow} direction="vertical" highlightLast label={`${stage.stage} system flow`} />
+          </figure>
+        </m.div>
+      </AnimatePresence>
+      <p className="mt-6 text-xs text-dim">Stages three to six overlap within my current role — they are how the work deepened, not separate jobs.</p>
     </div>
   );
 }

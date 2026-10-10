@@ -6,12 +6,12 @@ export const problems = [
   },
   {
     problem: "A large monolithic backend becomes difficult to maintain.",
-    solution: "Separate responsibilities into focused services.",
+    solution: "Separate responsibilities into focused services, migrating one boundary at a time instead of rewriting.",
     tag: "Architecture",
   },
   {
     problem: "AI processing increases API latency.",
-    solution: "Use asynchronous / background enrichment and lazy processing where appropriate.",
+    solution: "Move enrichment into background workers, process lazily and cache the result, so responses don't wait on a model.",
     tag: "AI",
   },
   {
@@ -36,21 +36,10 @@ export const principles = [
 ];
 
 export const aiHub = {
-  center: "AI / LLM",
-  nodes: [
-    "Product Intelligence",
-    "Recommendation",
-    "Search",
-    "Automation",
-    "Voice",
-    "Research",
-    "Personalization",
-    "Data Analysis",
-    "Developer Assistance",
-  ],
-  statement: "I don't treat AI as a separate feature. I integrate intelligence into existing software systems.",
-  traditional: ["Request", "Business Logic", "Database", "Response"],
-  enabled: ["Request", "Intent Understanding", "Business Logic", "Data Retrieval", "AI Enrichment", "Ranking", "Response"],
+  uses: ["Search intent", "Recommendation reranking", "Product data enrichment", "Comparison insights", "Automation", "Developer tooling"],
+  statement: "I don't treat AI as a separate feature. I add it to software that already works.",
+  traditional: ["Request", "Business logic", "Database", "Response"],
+  enabled: ["Request", "Intent understanding", "Business logic", "Data retrieval", "AI enrichment", "Ranking", "Response"],
 };
 
 export const architecturePatterns = {

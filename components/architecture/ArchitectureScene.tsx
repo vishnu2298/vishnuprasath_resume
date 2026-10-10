@@ -51,7 +51,7 @@ function Graph({ pattern, reducedMotion, spin }: Pick<Props, "pattern" | "reduce
         return {
           geo,
           edges: new THREE.EdgesGeometry(geo, 20),
-          label: makeLabel(n.label, { size: 38, weight: 600, bg: "rgba(10,10,12,0.85)", border: "rgba(255,120,60,0.45)" }),
+          label: makeLabel(n.label, { size: 38, weight: 600, bg: "rgba(16,24,32,0.88)", border: "rgba(99,183,174,0.45)" }),
         };
       }),
     [],
@@ -132,11 +132,11 @@ function Graph({ pattern, reducedMotion, spin }: Pick<Props, "pattern" | "reduce
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[linePos, 3]} />
         </bufferGeometry>
-        <lineBasicMaterial color="#ff6a2b" transparent opacity={0.55} />
+        <lineBasicMaterial color="#63b7ae" transparent opacity={0.5} />
       </lineSegments>
       <instancedMesh ref={pulses} args={[undefined, undefined, MAX_EDGES * PULSES_PER_EDGE]} frustumCulled={false}>
         <sphereGeometry args={[0.06, 10, 8]} />
-        <meshBasicMaterial color="#ffd2a1" toneMapped={false} />
+        <meshBasicMaterial color="#d8efeb" toneMapped={false} />
       </instancedMesh>
 
       {labNodes.map((n, i) => {
@@ -154,9 +154,9 @@ function Graph({ pattern, reducedMotion, spin }: Pick<Props, "pattern" | "reduce
             <group>
               <mesh geometry={a.geo}>
                 <meshStandardMaterial
-                  color={accent ? "#ff5a1f" : "#34343d"}
-                  emissive={accent ? "#ff3d1a" : "#2a1208"}
-                  emissiveIntensity={accent ? 0.9 : 0.6}
+                  color={accent ? "#4f9c94" : "#2a3943"}
+                  emissive={accent ? "#1f4a46" : "#101c24"}
+                  emissiveIntensity={accent ? 0.7 : 0.5}
                   roughness={0.45}
                   metalness={0.35}
                   transparent
@@ -164,7 +164,7 @@ function Graph({ pattern, reducedMotion, spin }: Pick<Props, "pattern" | "reduce
                 />
               </mesh>
               <lineSegments geometry={a.edges}>
-                <lineBasicMaterial color={accent ? "#ffd2a1" : "#ff7a3d"} transparent opacity={0.8} />
+                <lineBasicMaterial color={accent ? "#c9e6e2" : "#7fa9bf"} transparent opacity={0.75} />
               </lineSegments>
             </group>
             <sprite position={[0, n.shape === "gateway" ? 0.48 : 0.62, 0]} scale={[0.3 * a.label.aspect, 0.3, 1]}>
@@ -200,8 +200,8 @@ export default function ArchitectureScene(props: Props) {
     >
       <ambientLight intensity={0.5} />
       <directionalLight position={[4, 6, 6]} intensity={1.2} />
-      <pointLight position={[-4, -2, 3]} intensity={6} distance={14} decay={1.5} color="#ff5a1f" />
-      <gridHelper args={[16, 16, "#1a1210", "#1a1210"]} position={[0, -3.4, 0]} />
+      <pointLight position={[-4, -2, 3]} intensity={4} distance={14} decay={1.5} color="#63b7ae" />
+      <gridHelper args={[16, 16, "#1b2730", "#1b2730"]} position={[0, -3.4, 0]} />
       <Graph {...rest} />
       <Zoom zoom={zoom} />
       {allowDrag && <OrbitControls enablePan={false} enableZoom={false} minPolarAngle={0.6} maxPolarAngle={2.1} />}

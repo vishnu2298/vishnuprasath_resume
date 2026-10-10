@@ -3,7 +3,7 @@ import { profile } from "@/data/profile";
 
 export const dynamic = "force-static";
 
-export const alt = `${profile.name} — Software Engineer | Backend | AI`;
+export const alt = `${profile.name} — Backend, search & AI integration`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -17,20 +17,25 @@ export default function OG() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          padding: 72,
-          background: "radial-gradient(70% 80% at 85% 70%, rgba(255,90,31,0.45), rgba(7,7,9,1) 65%)",
-          backgroundColor: "#070709",
-          color: "#efece6",
-          fontFamily: "sans-serif",
+          padding: 80,
+          background: "radial-gradient(70% 80% at 85% 70%, rgba(99,183,174,0.22), rgba(16,24,32,1) 65%)",
+          backgroundColor: "#101820",
+          color: "#f1f2ee",
+          fontFamily: "Georgia, serif",
         }}
       >
-        <div style={{ display: "flex", fontSize: 22, letterSpacing: 6, color: "#a19d96" }}>{profile.eyebrow.toUpperCase()}</div>
+        <div style={{ display: "flex", fontSize: 34, color: "#f1f2ee" }}>{profile.name}</div>
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <div style={{ fontSize: 132, fontWeight: 900, lineHeight: 0.9, letterSpacing: -4 }}>VISHNU</div>
-          <div style={{ fontSize: 132, fontWeight: 900, lineHeight: 0.9, letterSpacing: -4, color: "#ff5a1f" }}>PRASATH</div>
-          <div style={{ marginTop: 36, fontSize: 38, fontWeight: 700 }}>Building systems. Adding intelligence.</div>
+          <div style={{ display: "flex", fontSize: 84, lineHeight: 1.05, letterSpacing: -2 }}>
+            Building&nbsp;<span style={{ color: "#63b7ae", fontStyle: "italic" }}>reliable</span>&nbsp;systems.
+          </div>
+          <div style={{ display: "flex", fontSize: 52, lineHeight: 1.15, color: "#a5b2bc", marginTop: 8 }}>
+            {profile.headline.follow}
+          </div>
         </div>
-        <div style={{ display: "flex", fontSize: 22, color: "#a19d96" }}>{profile.roles.join("  ·  ")}</div>
+        <div style={{ display: "flex", fontSize: 24, color: "#a5b2bc", fontFamily: "sans-serif" }}>
+          {profile.focus} · {profile.location}
+        </div>
       </div>
     ),
     size,

@@ -1,35 +1,40 @@
-import { labProjects, labStages } from "@/data/experience";
-import { progression } from "@/data/journey";
+"use client";
+
+import { useState } from "react";
+import { ArrowUpRight } from "lucide-react";
+import { labExperiments, labStages } from "@/data/experience";
+import { projects, type Project } from "@/data/projects";
 import { Reveal } from "@/components/ui/Reveal";
 import { StatusBadge } from "@/components/projects/StatusBadge";
+import { ProjectDialog } from "@/components/projects/Projects";
 
 /** Stage track instead of fake percentages: Concept → Exploring → Building → Shipped. */
 function StageTrack({ stage, title }: { stage: number; title: string }) {
   const pct = (stage / (labStages.length - 1)) * 100;
   return (
-    <div>
+    <div className="w-full">
       <div
         role="meter"
-        aria-label={`${title} progress stage`}
+        aria-label={`${title} stage`}
         aria-valuemin={0}
         aria-valuemax={labStages.length - 1}
         aria-valuenow={stage}
         aria-valuetext={labStages[Math.floor(stage)]}
-        className="relative h-1 rounded-full bg-white/[0.08]"
+        className="relative h-px bg-[var(--line-strong)]"
       >
-        <span className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-amber to-accent" style={{ width: `${pct}%` }} />
+        <span className="absolute inset-y-0 left-0 bg-accent" style={{ width: `${pct}%` }} />
         {labStages.map((s, i) => (
           <span
             key={s}
             aria-hidden
-            className={`absolute top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full border ${
-              i <= stage ? "border-accent bg-accent" : "border-white/25 bg-ink"
+            className={`absolute top-1/2 h-[7px] w-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full border ${
+              i <= stage ? "border-accent bg-accent" : "border-[var(--line-strong)] bg-ink"
             }`}
             style={{ left: `${(i / (labStages.length - 1)) * 100}%` }}
           />
         ))}
       </div>
-      <div aria-hidden className="mt-2 flex justify-between font-mono text-[0.55rem] uppercase tracking-[0.14em] text-dim">
+      <div aria-hidden className="mt-2.5 flex justify-between text-[0.66rem] text-dim">
         {labStages.map((s) => (
           <span key={s}>{s}</span>
         ))}
@@ -39,55 +44,48 @@ function StageTrack({ stage, title }: { stage: number; title: string }) {
 }
 
 export function Lab() {
+  const [open, setOpen] = useState<Project | null>(null);
+  const products = projects.filter((p) => p.kind === "product");
+
   return (
-    <div>
-      <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {labProjects.map((p, i) => (
-          <Reveal as="li" key={p.title} delay={(i % 4) * 0.06}>
-            <article className="panel panel-hover relative flex h-full flex-col overflow-hidden p-6">
-              {/* Experimental feel: blueprint grid + dashed outline */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 opacity-[0.35]"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
-                  backgroundSize: "22px 22px",
-                }}
-              />
-              <div className="relative flex items-center justify-between">
-                <StatusBadge status={p.status} text={p.statusText} />
-                <span className="font-mono text-[0.6rem] text-dim">LAB/{String(i + 1).padStart(2, "0")}</span>
+    <div className="grid gap-16 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
+      <ul className="flex flex-col gap-3">
+        {products.map((p, i) => (
+          <Reveal as="li" key={p.id} delay={i * 0.05}>
+            <article className="panel panel-hover grid gap-6 p-6 md:grid-cols-[minmax(0,1fr)_14rem] md:items-center md:p-7">
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h3 className="heading text-[1.45rem]">{p.title}</h3>
+                  <StatusBadge status={p.status} />
+                </div>
+                <p className="mt-2 text-[0.95rem] leading-relaxed text-muted">{p.summary}</p>
+                <button onClick={() => setOpen(p)} aria-haspopup="dialog" className="link mt-4 inline-flex items-center gap-1.5 text-sm">
+                  How it works <ArrowUpRight size={14} aria-hidden />
+                  <span className="sr-only">: {p.title}</span>
+                </button>
               </div>
-              <h3 className="heading relative mt-6 text-xl">{p.title}</h3>
-              <p className="relative mt-2 flex-1 text-sm leading-relaxed text-muted">{p.note}</p>
-              <div className="relative mt-6">
-                <StageTrack stage={p.stage} title={p.title} />
-              </div>
+              <StageTrack stage={p.labStage ?? 0} title={p.title} />
             </article>
           </Reveal>
         ))}
       </ul>
 
-      <Reveal className="mt-16">
-        <p className="eyebrow mb-5">The progression</p>
-        <ol className="flex flex-wrap items-center gap-x-3 gap-y-3" aria-label="From work experience to entrepreneurial thinking">
-          {progression.map((s, i) => (
-            <li key={s} className="flex items-center gap-3">
-              <span
-                className={`heading text-[clamp(0.95rem,1.8vw,1.35rem)] ${i === progression.length - 1 ? "accent-gradient" : i >= 3 ? "text-fg" : "text-muted"}`}
-              >
-                {s}
-              </span>
-              {i < progression.length - 1 && (
-                <span aria-hidden className="text-accent">
-                  →
-                </span>
-              )}
+      <Reveal delay={0.1}>
+        <h3 className="heading text-xl">Smaller experiments</h3>
+        <ul className="mt-6 border-b border-[var(--line)]">
+          {labExperiments.map((e) => (
+            <li key={e.title} className="rule-top py-5">
+              <p className="font-medium text-fg">{e.title}</p>
+              <p className="mt-1 text-sm leading-relaxed text-muted">{e.note}</p>
             </li>
           ))}
-        </ol>
+        </ul>
+        <p className="mt-6 text-sm leading-relaxed text-dim">
+          Nothing here is shipped. These are where I try ideas before they are useful at work — or decide they aren&apos;t.
+        </p>
       </Reveal>
+
+      <ProjectDialog project={open} onClose={() => setOpen(null)} />
     </div>
   );
 }

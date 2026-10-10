@@ -1,0 +1,4 @@
+:HL["/vishnuprasath_resume/_next/static/chunks/3ujv5swi11j-n.css","style"]
+2:[["children",{"s":"__PAGE__","h":160}]]
+1:[["children",{"s":"/_not-found","h":96,"c":"$Q2"}]]
+0:{"b":"azd3hKNm5sHyM7r2DFKa2","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

@@ -1,0 +1,7 @@
+:HL["/vishnuprasath_resume/_next/static/chunks/3ujv5swi11j-n.css","style"]
+:HL["/vishnuprasath_resume/_next/static/media/2b7d3311b69a4dca-s.p.1elj1f4z6aq4a.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/vishnuprasath_resume/_next/static/media/70bc3e132a0a741e-s.p.3t6q91iet4nsy.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/vishnuprasath_resume/_next/static/media/83afe278b6a6bb3c-s.p.2bn3s6zvc0dyp.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/vishnuprasath_resume/_next/static/media/d38f3bca7db33566-s.p.0op912u62qdhl.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+1:[["children",{"s":"__PAGE__","h":160}]]
+0:{"b":"azd3hKNm5sHyM7r2DFKa2","t":{"t":{"s":"","h":80,"c":"$Q1"}}}

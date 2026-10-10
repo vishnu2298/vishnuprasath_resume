@@ -50,8 +50,11 @@ export const projects: Project[] = [
       "Third-party API integration",
       "Production issue resolution",
       "Service separation",
+      "React Native app releases",
+      "Email-based identity & OTP flows",
+      "Multi-region (US + India) rollout",
     ],
-    tech: ["Node.js", "MongoDB", "Elasticsearch", "AI / LLM", "SerpAPI", "REST APIs", "Azure"],
+    tech: ["Node.js", "MongoDB", "Elasticsearch", "Kibana", "React Native", "Angular", "AI / LLM", "REST APIs", "Docker", "Azure"],
     architecture: ["Client", "API Gateway", "Node.js Services", "MongoDB", "Elasticsearch", "AI Services", "External APIs"],
   },
   {

@@ -26,7 +26,7 @@ const desktop: Record<Chapter, Key> = {
 
 /** Portrait screens: keep the scene in the upper half so hero text below stays clear. */
 const portraitOverrides: Partial<Record<Chapter, Key>> = {
-  hero: { pos: [1.2, 1.9, 6.8], look: [0.45, -0.35, 0] },
+  hero: { pos: [0.75, 2.3, 9.4], look: [0.9, -0.75, 0] },
   journey: { pos: [0.6, 1.6, 3.4], look: [0, 1.0, -0.4] },
   ai: { pos: [6.2, 2.6, 2.6], look: [8, 2.0, -5] },
   lab: { pos: [0, 2.4, -5.6], look: [0, 1.4, -13] },

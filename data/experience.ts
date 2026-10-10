@@ -15,6 +15,12 @@ export const roles = [
       "AI integrations",
       "Recommendation & search systems",
       "Third-party integrations",
+      "React Native mobile apps (deep linking, CodePush releases)",
+      "Elasticsearch + Kibana analytics dashboards",
+      "CRON jobs & background processing",
+      "OTP provider migration",
+      "Multi-region rollout & localization",
+      "Docker, GitLab CI/CD & Azure deployments",
     ],
   },
   {
@@ -71,6 +77,8 @@ export const leadership = {
     "Architecture discussions",
     "Microservice migration",
     "AI-assisted engineering",
+    "Code reviews & best practices",
+    "Sprint planning with product, QA & marketing",
   ],
 };
 
@@ -81,6 +89,7 @@ export const metrics = [
   { value: "AI", label: "In real products", note: "Integrated, not demoed" },
   { value: "Microservices", label: "Architecture & migration", note: "Monolith → services" },
   { value: "Search", label: "& recommendations", note: "Product intelligence" },
+  { value: "Full-stack", label: "Web + mobile", note: "Node.js · Angular · React Native" },
 ];
 
 export type LabStatus = "BUILDING" | "EXPLORING" | "EXPERIMENT" | "CONCEPT";

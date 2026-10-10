@@ -12,9 +12,18 @@ npm run build && npm start
 
 Set `NEXT_PUBLIC_SITE_URL` in production so canonical, OpenGraph and JSON-LD URLs are absolute.
 
+## Hosting (GitHub Pages)
+
+The site is a static export (`output: "export"` → `out/`). `.github/workflows/pages.yml` builds it on every push to `main`
+(and the working branch) with `NEXT_PUBLIC_BASE_PATH=/<repo>` and publishes `out/` to the `gh-pages` branch.
+
+Live URL: **https://vishnu2298.github.io/vishnuprasath_resume/**
+
+If the site 404s after the first run, enable Pages once: *Settings → Pages → Build and deployment → Source: Deploy from a branch → `gh-pages` / `(root)`*.
+
 ## Before deploying
 
-1. **`data/profile.ts` → `links`** — add LinkedIn, GitHub, email. Empty links render as disabled buttons.
+1. **`data/profile.ts` → `links`** — GitHub is set; add LinkedIn and email if you want them public. Empty links render as disabled buttons.
 2. **Resume PDF** — drop a file in `public/` and set `links.resume` (e.g. `"/resume.pdf"`). Without it, "Download resume" opens Resume Mode and the print dialog (Save as PDF), which has a light print stylesheet.
 3. **Review the content** in `/data`. Employer, client and school names are intentionally left out, and nothing claims metrics.
 
@@ -55,7 +64,7 @@ lib/                 world state (scroll → chapter), device tier, canvas text 
 - **One background world.** `components/3d/World.tsx` is a single fixed canvas. `ScrollDirector` measures every `[data-chapter]` section and turns scroll position into a continuous chapter value. `CameraRig` interpolates between per-chapter camera keyframes. To retune a shot, edit `desktop` / `portraitOverrides` in `CameraRig.tsx`.
 - **Readability.** Each chapter has a shade level (`DIM` in `ScrollDirector.tsx`), so text never depends on what the 3D layer is doing.
 - **Interactive canvases** (Tech Galaxy, Architecture Lab) mount only near the viewport, stop rendering off-screen, and pause the background world while they're visible. Only one render loop runs at a time.
-- **The avatar** (`Avatar.tsx`) is built from primitives, so there's no model download. To use a real character, replace the component with a `useGLTF` model (Draco/Meshopt-compressed, under ~1–2 MB) and keep the `root`/`upper`/`head` refs for the existing motion.
+- **The avatar** (`Avatar.tsx`) is a stylized likeness (side-swept hair, goatee, navy suit, light-blue shirt, black tie) built from primitives, so there's no model download and no photo is shipped. It blinks, follows the pointer, and waves in the contact chapter. To use a real character, replace the component with a `useGLTF` model (Draco/Meshopt-compressed, under ~1–2 MB) and keep the `root`/`upper`/`head` refs for the existing motion.
 
 ## Performance
 

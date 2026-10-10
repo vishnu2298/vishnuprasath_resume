@@ -4,7 +4,7 @@ export const stackLevels = [
     level: 1,
     name: "Application",
     note: "Where it started",
-    items: ["Angular", "AngularJS", "Angular Material", "Kendo UI", "Bootstrap", "NativeScript"],
+    items: ["Angular", "AngularJS", "RxJS", "Angular Material", "React Native", "Kendo UI", "NativeScript"],
   },
   {
     level: 2,
@@ -16,13 +16,13 @@ export const stackLevels = [
     level: 3,
     name: "Data",
     note: "How data moves",
-    items: ["MongoDB", "PostgreSQL", "MySQL", "Elasticsearch"],
+    items: ["MongoDB", "PostgreSQL", "MySQL", "Elasticsearch", "Kibana"],
   },
   {
     level: 4,
     name: "Systems",
     note: "How it fits together",
-    items: ["Microservices", "API Architecture", "Search", "Data Pipelines", "Third-party Integrations"],
+    items: ["Microservices", "API Architecture", "Auth & Authorization", "CRON / Background Jobs", "Docker", "GitLab CI/CD", "Azure"],
   },
   {
     level: 5,
@@ -38,6 +38,8 @@ export type GalaxyCategory =
   | "ai"
   | "search"
   | "cloud"
+  | "mobile"
+  | "devops"
   | "integrations"
   | "architecture"
   | "foundations";
@@ -49,6 +51,8 @@ export const galaxyCategories: { id: GalaxyCategory; label: string; color: strin
   { id: "ai", label: "AI", color: "#ff3d2e" },
   { id: "architecture", label: "Architecture", color: "#f08a5d" },
   { id: "integrations", label: "Integrations", color: "#d9a07a" },
+  { id: "mobile", label: "Mobile", color: "#ff9a5c" },
+  { id: "devops", label: "DevOps", color: "#b8a59a" },
   { id: "cloud", label: "Cloud / Services", color: "#c9bdb3" },
   { id: "foundations", label: "Foundations", color: "#8f8a86" },
 ];
@@ -63,6 +67,8 @@ export const galaxyNodes: GalaxyNode[] = [
   { id: "rest", label: "REST APIs", category: "backend" },
   { id: "micro", label: "Microservices", category: "backend" },
   { id: "apiarch", label: "API Architecture", category: "backend" },
+  { id: "auth", label: "Auth & Authorization", category: "backend" },
+  { id: "cron", label: "CRON / Background Jobs", category: "backend" },
   // Data
   { id: "mongo", label: "MongoDB", category: "data", core: true },
   { id: "es", label: "Elasticsearch", category: "data", core: true },
@@ -70,11 +76,13 @@ export const galaxyNodes: GalaxyNode[] = [
   { id: "mysql", label: "MySQL", category: "data" },
   { id: "mongoose", label: "Mongoose", category: "data" },
   { id: "sequelize", label: "Sequelize", category: "data" },
+  { id: "agg", label: "Aggregation Pipelines", category: "data" },
   // Search
   { id: "psearch", label: "Product Search", category: "search" },
   { id: "keyword", label: "Keyword Matching", category: "search" },
   { id: "relevance", label: "Search Relevance", category: "search" },
   { id: "soptim", label: "Search Optimization", category: "search" },
+  { id: "kibana", label: "Kibana Dashboards", category: "search" },
   // AI
   { id: "genai", label: "Generative AI", category: "ai", core: true },
   { id: "llm", label: "LLM Integration", category: "ai" },
@@ -98,7 +106,18 @@ export const galaxyNodes: GalaxyNode[] = [
   { id: "push", label: "Push Notification APIs", category: "integrations" },
   { id: "ocr", label: "OCR APIs", category: "integrations" },
   { id: "analytics", label: "Analytics APIs", category: "integrations" },
+  { id: "otp", label: "OTP / SMS Providers", category: "integrations" },
   { id: "thirdparty", label: "Third-party APIs", category: "integrations", core: true },
+  // Mobile
+  { id: "rn", label: "React Native", category: "mobile", core: true },
+  { id: "deeplink", label: "Deep Linking", category: "mobile" },
+  { id: "codepush", label: "CodePush Releases", category: "mobile" },
+  { id: "native", label: "Android / iOS Native Modules", category: "mobile" },
+  // DevOps
+  { id: "docker", label: "Docker", category: "devops" },
+  { id: "gitlab", label: "GitLab CI/CD", category: "devops" },
+  { id: "multirepo", label: "Multi-repo Services", category: "devops" },
+  { id: "region", label: "Multi-region Deployment", category: "devops" },
   // Cloud
   { id: "azure", label: "Azure", category: "cloud" },
   { id: "firebase", label: "Firebase", category: "cloud" },
@@ -107,6 +126,7 @@ export const galaxyNodes: GalaxyNode[] = [
   // Foundations
   { id: "angular", label: "Angular", category: "foundations" },
   { id: "angularjs", label: "AngularJS", category: "foundations" },
+  { id: "rxjs", label: "RxJS", category: "foundations" },
   { id: "nativescript", label: "NativeScript", category: "foundations" },
   { id: "kendo", label: "Kendo UI", category: "foundations" },
 ];
@@ -162,6 +182,27 @@ export const galaxyEdges: [string, string][] = [
   ["event", "pipelines"],
   ["orch", "thirdparty"],
   ["cache", "node"],
+  ["node", "auth"],
+  ["node", "cron"],
+  ["cron", "pipelines"],
+  ["mongo", "agg"],
+  ["es", "kibana"],
+  ["kibana", "analytics"],
+  ["thirdparty", "otp"],
+  ["auth", "otp"],
+  // Mobile
+  ["rn", "rest"],
+  ["rn", "deeplink"],
+  ["rn", "codepush"],
+  ["rn", "native"],
+  ["rn", "push"],
+  // DevOps
+  ["docker", "gitlab"],
+  ["docker", "micro"],
+  ["gitlab", "multirepo"],
+  ["multirepo", "micro"],
+  ["region", "azure"],
+  ["docker", "azure"],
   // Integrations
   ["thirdparty", "serp"],
   ["thirdparty", "affiliate"],
@@ -180,6 +221,7 @@ export const galaxyEdges: [string, string][] = [
   ["angularjs", "angular"],
   ["nativescript", "angular"],
   ["kendo", "angular"],
+  ["rxjs", "angular"],
   ["angular", "node"],
 ];
 

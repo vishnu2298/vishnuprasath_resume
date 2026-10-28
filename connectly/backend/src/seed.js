@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const { open } = require('./db');
+const { open, newReferralCode } = require('./db');
 const { CITIES, jitter } = require('./util');
 
 const PASSWORD = 'demo1234';
@@ -37,19 +37,25 @@ const LISTINGS = [
 
 function seed(db) {
   const hash = bcrypt.hashSync(PASSWORD, 8);
-  const insU = db.prepare('INSERT INTO users (name,email,password_hash,city,lat,lng,bio,interests,verified,last_seen) VALUES (?,?,?,?,?,?,?,?,?,?)');
+  const insU = db.prepare('INSERT INTO users (name,email,password_hash,city,lat,lng,bio,interests,verified,last_seen,referral_code) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
   const ids = USERS.map(([name, email, city, bio, interests, verified], i) => {
     const [lat, lng] = CITIES[city];
     // Chennai users sit at increasing distances from the demo user.
     const last = i === 1 || i === 3 ? new Date().toISOString().slice(0, 19).replace('T', ' ') : '2020-01-01 00:00:00';
-    return Number(insU.run(name, email, hash, city, lat + i * 0.011, lng + i * 0.009, bio, interests, verified, last).lastInsertRowid);
+    return Number(insU.run(name, email, hash, city, lat + i * 0.011, lng + i * 0.009, bio, interests, verified, last, newReferralCode()).lastInsertRowid);
   });
+
+  // A brand partner (Sneha's shop) with one sponsored ad, so the Sponsored slots have content in demos.
+  db.prepare("UPDATE users SET account_type = 'brand', brand_name = 'Nair Home Studio' WHERE id = ?").run(ids[2]);
 
   const insL = db.prepare('INSERT INTO listings (seller_id,title,description,category,price,condition,brand,warranty,city,lat,lng) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
   const listingIds = LISTINGS.map(([s, title, cat, price, cond, brand, warr, desc]) => {
     const u = db.prepare('SELECT * FROM users WHERE id = ?').get(ids[s]);
     return Number(insL.run(u.id, title, desc, cat, price, cond, brand, warr, u.city, jitter(u.lat, 0.02), jitter(u.lng, 0.02)).lastInsertRowid);
   });
+
+  const adTarget = listingIds[1];
+  db.prepare("INSERT INTO ads (brand_id,title,body,cta_label,target_listing_id,placement,cost_per_click,daily_budget) VALUES (?,?,?,?,?,'all',3,300)").run(ids[2], 'Comfort for your home office', 'Ergonomic chairs and tables from Nair Home Studio.', 'See the chair', adTarget);
 
   // Connections: demo is connected with Arun, has requests from Rohit & Sneha.
   const conn = db.prepare('INSERT INTO connections (requester_id, addressee_id, status) VALUES (?,?,?)');

@@ -28,6 +28,7 @@ export function Profile() {
         <Txt variant="title" center>{user.name}</Txt>
         <Txt color={colors.sub}>{user.city}{user.email ? ` · ${user.email}` : ''}</Txt>
         {user.verified ? <Pill text="Verified profile" icon="shield-checkmark" color={colors.buy} bg={colors.buySoft} /> : null}
+        {user.isBrand ? <Pill text={`Brand · ${user.brandName}`} icon="storefront" /> : null}
         {user.reviewCount ? <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}><Stars rating={user.rating} /><Txt variant="small" color={colors.sub}>({user.reviewCount})</Txt></View> : null}
         <View style={{ flexDirection: 'row', width: '100%', marginTop: 8 }}>
           <Stat value={user.listingCount} label="Listings" /><Stat value={user.reviewCount ? user.rating : '—'} label="Rating" /><Stat value={user.connectionCount} label="Connections" />
@@ -40,9 +41,11 @@ export function Profile() {
         <Card><Txt color={colors.sub} style={{ marginBottom: 12 }}>You have not listed anything yet.</Txt><Button title="Sell your first item" variant="sell" icon="pricetag" onPress={() => nav.navigate('SellItem')} /></Card>}
 
       <Card style={{ marginTop: 20, paddingVertical: 6 }}>
+        <Row icon="gift" label="Invite friends and family" value="Bring your people to Connectly" onPress={() => nav.navigate('Invite')} />
         <Row icon="receipt" label="My orders" value="Things you bought and sold" onPress={() => nav.navigate('Orders')} />
         <Row icon="heart" label="Saved items" onPress={() => nav.navigate('Favorites')} />
         <Row icon="people" label="My connections" onPress={() => nav.navigate('Connect')} />
+        <Row icon="storefront" label={user.isBrand ? 'Brand hub' : 'Selling as a business?'} value={user.isBrand ? user.brandName : 'Brand partners: ads and more'} onPress={() => nav.navigate('BrandHub')} />
         <Row icon="settings" label="Settings and text size" onPress={() => nav.navigate('Settings')} />
         <Row icon="shield-checkmark" label="Trust and safety" onPress={() => nav.navigate('Safety')} />
         <Row icon="log-out" label="Log out" danger onPress={logout} />

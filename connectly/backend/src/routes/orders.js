@@ -3,7 +3,7 @@ const { HttpError, str } = require('../util');
 
 // Order lifecycle: requested -> accepted -> completed (or declined / cancelled).
 // Payment happens in person at handover; the app records the agreement and builds trust.
-module.exports = ({ db, ser, auth }) => {
+module.exports = ({ db, ser, auth, notify }) => {
   const r = express.Router();
   const getOrder = db.prepare('SELECT * FROM orders WHERE id = ?');
   const getListing = db.prepare('SELECT * FROM listings WHERE id = ?');
@@ -16,6 +16,7 @@ module.exports = ({ db, ser, auth }) => {
       id: o.id,
       status: o.status,
       price: o.price,
+      commission: o.commission || 0,
       note: o.note,
       createdAt: o.created_at,
       role: o.buyer_id === me.id ? 'buyer' : 'seller',
@@ -36,6 +37,7 @@ module.exports = ({ db, ser, auth }) => {
     const info = db
       .prepare('INSERT INTO orders (listing_id,buyer_id,seller_id,price,note) VALUES (?,?,?,?,?)')
       .run(l.id, req.user.id, l.seller_id, l.price, str(req.body.note, { max: 300 }));
+    notify(l.seller_id, { type: 'order_request', title: 'New buy request', body: `${req.user.name || 'Someone'} wants to buy ${l.title}`, data: { orderId: Number(info.lastInsertRowid) } });
     res.status(201).json({ order: shape(getOrder.get(info.lastInsertRowid), req.user) });
   });
 
@@ -64,6 +66,7 @@ module.exports = ({ db, ser, auth }) => {
     } catch {
       throw new HttpError(409, 'You have already reviewed this deal');
     }
+    notify(reviewee, { type: 'review', title: `You received ${rating} star${rating > 1 ? 's' : ''}`, body: str(req.body.comment, { max: 100 }) || 'Someone reviewed their experience with you.', data: { userId: req.user.id } });
     res.status(201).json({ ok: true });
   });
 
@@ -83,10 +86,20 @@ module.exports = ({ db, ser, auth }) => {
     } else if (action === 'complete' && isSeller && o.status === 'accepted') {
       set('completed');
       db.prepare("UPDATE listings SET status = 'sold' WHERE id = ?").run(o.listing_id);
+      // Individuals are never charged. Brokerage applies only to brand sellers.
+      const seller = getUser.get(o.seller_id);
+      if (seller.account_type === 'brand') {
+        const fee = Math.round(o.price * seller.commission_rate);
+        db.prepare('UPDATE orders SET commission = ? WHERE id = ?').run(fee, o.id);
+        db.prepare('INSERT OR IGNORE INTO revenue_events (kind, amount, ref, brand_id) VALUES (?,?,?,?)').run('brokerage', fee, `order:${o.id}`, seller.id);
+      }
       db.prepare("UPDATE orders SET status = 'declined' WHERE listing_id = ? AND id != ? AND status IN ('requested','accepted')").run(o.listing_id, o.id);
     } else {
       throw new HttpError(400, 'That action is not available for this order');
     }
+    const titles = { accept: 'Request accepted', decline: 'Request declined', cancel: 'Request cancelled', complete: 'Deal completed' };
+    const listingTitle = getListing.get(o.listing_id)?.title || 'your item';
+    notify(isSeller ? o.buyer_id : o.seller_id, { type: 'order_update', title: titles[action], body: `${req.user.name || 'The other person'}: ${listingTitle}`, data: { orderId: o.id } });
     res.json({ order: shape(getOrder.get(o.id), req.user) });
   });
 

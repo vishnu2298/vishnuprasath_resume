@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../api';
 import { useDebounced, useLoad } from '../hooks';
-import { Avatar, Button, Card, Chip, Empty, ErrorState, Header, Loading, Pill, Screen, Txt, notify } from '../ui';
+import { Avatar, Button, Card, Chip, Empty, ErrorState, Header, Loading, Pill, Screen, Txt, notify, SkeletonRows, toast } from '../ui';
 import { colors, radius } from '../theme';
 import { Person } from '../types';
 import { useSettings } from '../context';
@@ -26,7 +26,7 @@ export function Connect() {
     try {
       const r = await api<{ connection: { status: Person['connection']['status'] } }>('/connections', { method: 'POST', body: { userId: p.id } });
       people.setData({ people: people.data!.people.map((x) => (x.id === p.id ? { ...x, connection: r.connection } : x)) });
-      if (r.connection.status === 'sent') notify('Request sent', `${p.name.split(' ')[0]} will see your request.`);
+      if (r.connection.status === 'sent') toast(`Request sent to ${p.name.split(' ')[0]}`);
       void mine.reload(true);
     } catch (e: any) { notify('Could not connect', e.message); }
   };
@@ -72,11 +72,11 @@ export function Connect() {
             {interests.data.interests.slice(0, 12).map((i) => <Chip key={i.name} label={i.name} selected={interest === i.name} onPress={() => setInterest(interest === i.name ? null : i.name)} />)}
           </ScrollView>
         ) : <View style={{ height: 14 }} />}
-        {people.loading && !people.data ? <Loading /> : people.error && !people.data ? <ErrorState message={people.error} retry={() => people.reload()} /> :
+        {people.loading && !people.data ? <SkeletonRows /> : people.error && !people.data ? <ErrorState message={people.error} retry={() => people.reload()} /> :
           !people.data?.people.length ? <Empty icon="people" title="No one found" text="Try a different search, or clear the interest filter." /> :
             <View style={{ gap: 10 }}>{people.data.people.map((p) => <PersonRow key={p.id} p={p} />)}</View>}
       </> : (
-        mine.loading && !mine.data ? <Loading /> : !mine.data?.connections.length ? <Empty icon="person-add" title="No connections yet" text="Connect with people nearby to chat and build trust." action={{ title: 'Find people nearby', onPress: () => setTab('nearby') }} /> :
+        mine.loading && !mine.data ? <SkeletonRows /> : !mine.data?.connections.length ? <Empty icon="person-add" title="No connections yet" text="Connect with people nearby to chat and build trust." action={{ title: 'Find people nearby', onPress: () => setTab('nearby') }} /> :
           <View style={{ gap: 10 }}>{mine.data.connections.map((c) => <PersonRow key={c.id} p={{ ...c.user, distanceKm: null, connection: { status: 'connected' } }} />)}</View>
       )}
     </Screen>

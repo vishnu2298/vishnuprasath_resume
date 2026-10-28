@@ -2,9 +2,9 @@ const express = require('express');
 const { HttpError, str } = require('../util');
 const insights = require('../insights');
 
-module.exports = ({ db, ser, auth }) => {
+module.exports = ({ db, ser, auth, notify }) => {
   const r = express.Router();
-  r.use(auth.required);
+  r.use(['/conversations', '/unread-count'], auth.required);
   const getConv = db.prepare('SELECT * FROM conversations WHERE id = ?');
   const getUser = db.prepare('SELECT * FROM users WHERE id = ?');
   const getListing = db.prepare('SELECT * FROM listings WHERE id = ?');
@@ -57,7 +57,8 @@ module.exports = ({ db, ser, auth }) => {
       )
       .get(req.user.id, req.user.id, req.user.id).n;
     const requests = db.prepare("SELECT COUNT(*) n FROM connections WHERE addressee_id = ? AND status = 'pending'").get(req.user.id).n;
-    res.json({ messages: n, requests });
+    const notifications = db.prepare('SELECT COUNT(*) n FROM notifications WHERE user_id = ? AND read_at IS NULL').get(req.user.id).n;
+    res.json({ messages: n, requests, notifications });
   });
 
   // Find or create a conversation with another user (optionally about a listing).
@@ -105,6 +106,7 @@ module.exports = ({ db, ser, auth }) => {
     const mod = type === 'text' ? await insights.moderate(body) : { allowed: true, flags: [] };
     const info = db.prepare('INSERT INTO messages (conversation_id, sender_id, body, type) VALUES (?,?,?,?)').run(c.id, req.user.id, body, type);
     db.prepare('UPDATE conversations SET updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(c.id);
+    notify(otherId, { type: 'message', title: req.user.name || 'New message', body: type === 'location' ? 'Shared a location' : body.slice(0, 140), data: { conversationId: c.id } }, { inbox: false });
     res.status(201).json({
       message: msg(db.prepare('SELECT * FROM messages WHERE id = ?').get(info.lastInsertRowid)),
       safetyTip: mod.flags?.length ? 'Stay safe: never pay in advance or share OTPs, card details or passwords. Meet in a public place.' : null,

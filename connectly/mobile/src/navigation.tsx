@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { NavigationContainer, DefaultTheme, useNavigation } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, useNavigation, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,8 +22,15 @@ import { Profile } from './screens/Profile';
 import { UserProfile } from './screens/UserProfile';
 import { Favorites, MyListings, Orders } from './screens/Lists';
 import { EditProfile, Report, Safety, Settings } from './screens/Account';
+import { CompleteProfile, GoogleDevSignIn, PhoneSignIn } from './screens/SignIn';
+import { Deals } from './screens/Deals';
+import { Invite } from './screens/Invite';
+import { Notifications, routeFor } from './screens/Notifications';
+import { BrandHub } from './screens/BrandHub';
+import { listenForNotificationTaps } from './push';
 
 const Stack = createNativeStackNavigator();
+const navRef = createNavigationContainerRef<any>();
 const Tabs = createBottomTabNavigator();
 
 const TAB_ICONS: Record<string, [string, string, string]> = {
@@ -74,7 +81,7 @@ function TabBar({ state, navigation }: any) {
 
 function MainTabs() {
   return (
-    <Tabs.Navigator tabBar={(p) => <TabBar {...p} />} screenOptions={{ headerShown: false }}>
+    <Tabs.Navigator tabBar={(p) => <TabBar {...p} />} screenOptions={{ headerShown: false, animation: 'fade' }}>
       <Tabs.Screen name="Home" component={Home} />
       <Tabs.Screen name="Explore" component={Explore} />
       <Tabs.Screen name="Messages" component={Messages} />
@@ -87,23 +94,40 @@ const theme = { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: c
 
 export function RootNavigator() {
   const { ready, user, seenOnboarding } = useAuth();
+  // Tapping a push notification opens the right screen (native only; a no-op on web).
+  useEffect(() => {
+    if (!user || user.needsProfile) return;
+    return listenForNotificationTaps((data) => {
+      const target = routeFor(data);
+      if (target && navRef.isReady()) navRef.navigate(target[0], target[1]);
+    });
+  }, [user?.id, user?.needsProfile]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!ready) {
     return <View style={{ flex: 1, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', gap: 16 }}><Logo size={96} /><Txt variant="hero" color={colors.primary}>Connectly</Txt><Txt color={colors.sub}>Buy  •  Sell  •  Connect</Txt><Loading /></View>;
   }
   return (
-    <NavigationContainer theme={theme}>
+    <NavigationContainer theme={theme} ref={navRef}>
       <Stack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
         {!seenOnboarding ? (
           <Stack.Screen name="Onboarding" component={Onboarding} />
         ) : !user ? (
           <>
             <Stack.Screen name="Welcome" component={Welcome} />
+            <Stack.Screen name="PhoneSignIn" component={PhoneSignIn} />
+            <Stack.Screen name="GoogleDev" component={GoogleDevSignIn} />
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Register" component={Register} />
           </>
+        ) : user.needsProfile ? (
+          <Stack.Screen name="CompleteProfile" component={CompleteProfile} />
         ) : (
           <>
             <Stack.Screen name="Main" component={MainTabs} />
+            <Stack.Screen name="Deals" component={Deals} />
+            <Stack.Screen name="Invite" component={Invite} />
+            <Stack.Screen name="Notifications" component={Notifications} />
+            <Stack.Screen name="BrandHub" component={BrandHub} />
             <Stack.Screen name="Listings" component={Listings} />
             <Stack.Screen name="Search" component={Search} />
             <Stack.Screen name="ItemDetails" component={ItemDetails} />

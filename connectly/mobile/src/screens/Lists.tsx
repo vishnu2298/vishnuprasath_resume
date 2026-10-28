@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { api, money, timeAgo } from '../api';
 import { useLoad } from '../hooks';
-import { Avatar, Button, Card, Empty, ErrorState, Header, Input, Loading, Pill, Screen, Stars, Txt, confirmDialog, notify } from '../ui';
+import { Avatar, Button, Card, Empty, ErrorState, Header, Input, Loading, Pill, Screen, Stars, Txt, confirmDialog, notify, SkeletonCardGrid, SkeletonRows, toast } from '../ui';
 import { colors, space } from '../theme';
 import { Listing, Order } from '../types';
 import { ListingGrid, ListingImage, toggleFavorite } from '../components/ListingCard';
@@ -15,7 +15,7 @@ export function Favorites() {
   const items = res.data?.listings || [];
   return (
     <Screen header={<Header title="Saved items" />} refresh={{ refreshing: res.refreshing, onRefresh: res.refresh }}>
-      {res.loading && !res.data ? <Loading /> : res.error && !res.data ? <ErrorState message={res.error} retry={() => res.reload()} /> :
+      {res.loading && !res.data ? <SkeletonCardGrid /> : res.error && !res.data ? <ErrorState message={res.error} retry={() => res.reload()} /> :
         !items.length ? <Empty icon="heart" title="Nothing saved yet" text="Tap the heart on any item to keep it here." action={{ title: 'Browse items', onPress: () => nav.navigate('Listings', {}) }} /> :
           <ListingGrid items={items} onOpen={(l) => nav.navigate('ItemDetails', { id: l.id })}
             onToggleFav={(l) => toggleFavorite(l, (n) => res.setData({ listings: n.isFavorite ? items.map((x) => (x.id === n.id ? n : x)) : items.filter((x) => x.id !== n.id) }))} />}
@@ -34,7 +34,7 @@ export function MyListings() {
   };
   return (
     <Screen header={<Header title="My listings" />} refresh={{ refreshing: res.refreshing, onRefresh: res.refresh }} footer={<Button title="Sell a new item" icon="add-circle" variant="sell" onPress={() => nav.navigate('SellItem')} />}>
-      {res.loading && !res.data ? <Loading /> : res.error && !res.data ? <ErrorState message={res.error} retry={() => res.reload()} /> :
+      {res.loading && !res.data ? <SkeletonRows /> : res.error && !res.data ? <ErrorState message={res.error} retry={() => res.reload()} /> :
         !items.length ? <Empty icon="pricetag" title="You have not listed anything" text="Selling takes about a minute." /> :
           <View style={{ gap: 12 }}>
             {items.map((l) => (
@@ -91,7 +91,7 @@ export function Orders() {
   const submitReview = async () => {
     if (!rate) return;
     setBusy(true);
-    try { await api(`/orders/${rate.id}/review`, { method: 'POST', body: { rating: stars, comment } }); setRate(null); setComment(''); setStars(5); void res.reload(true); notify('Thank you!', 'Your review helps keep Connectly trustworthy.'); } catch (e: any) { notify('Could not save review', e.message); } finally { setBusy(false); }
+    try { await api(`/orders/${rate.id}/review`, { method: 'POST', body: { rating: stars, comment } }); setRate(null); setComment(''); setStars(5); void res.reload(true); toast('Thank you! Your review helps others.'); } catch (e: any) { notify('Could not save review', e.message); } finally { setBusy(false); }
   };
 
   return (
@@ -103,7 +103,7 @@ export function Orders() {
           </Pressable>
         ))}
       </View>
-      {res.loading && !res.data ? <Loading /> : res.error && !res.data ? <ErrorState message={res.error} retry={() => res.reload()} /> :
+      {res.loading && !res.data ? <SkeletonRows /> : res.error && !res.data ? <ErrorState message={res.error} retry={() => res.reload()} /> :
         !orders.length ? <Empty icon="receipt" title={tab === 'buying' ? 'No purchases yet' : 'No buyer requests yet'} text={tab === 'buying' ? 'Tap "Buy Now" on an item to send a request.' : 'When someone wants your item, it appears here.'} /> :
           <View style={{ gap: 12 }}>
             {orders.map((o) => {

@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { api, timeAgo } from '../api';
 import { useLoad } from '../hooks';
-import { Avatar, Button, Card, Empty, ErrorState, Header, Loading, Screen, Txt, notify } from '../ui';
+import { Avatar, Button, Card, Empty, ErrorState, Header, Loading, Screen, Txt, notify, SkeletonRows, toast } from '../ui';
 import { colors, space } from '../theme';
 import { Conversation } from '../types';
 import { useEffect } from 'react';
@@ -20,7 +20,7 @@ export function Messages() {
   useEffect(() => { const t = setInterval(() => { void chats.reload(true); void reqs.reload(true); }, 8000); return () => clearInterval(t); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const respond = async (r: Req, accept: boolean) => {
-    try { await api(`/connections/${r.id}/respond`, { method: 'POST', body: { accept } }); void reqs.reload(true); if (accept) notify('You are now connected', `You and ${r.user.name} can now chat.`); } catch (e: any) { notify('Error', e.message); }
+    try { await api(`/connections/${r.id}/respond`, { method: 'POST', body: { accept } }); void reqs.reload(true); if (accept) toast(`You and ${r.user.name.split(' ')[0]} are now connected`); } catch (e: any) { notify('Error', e.message); }
   };
   const nReq = reqs.data?.requests.length || 0;
 
@@ -35,7 +35,7 @@ export function Messages() {
       </View>
 
       {tab === 'chats' ? (
-        chats.loading && !chats.data ? <Loading /> : chats.error && !chats.data ? <ErrorState message={chats.error} retry={() => chats.reload()} /> :
+        chats.loading && !chats.data ? <SkeletonRows /> : chats.error && !chats.data ? <ErrorState message={chats.error} retry={() => chats.reload()} /> :
           !chats.data?.conversations.length ? <Empty icon="chatbubbles" title="No messages yet" text="When you chat with a buyer or seller, it shows up here." action={{ title: 'Browse items', onPress: () => nav.navigate('Listings', {}) }} /> :
             <View style={{ gap: 10 }}>
               {chats.data.conversations.map((c) => (
@@ -56,7 +56,7 @@ export function Messages() {
               ))}
             </View>
       ) : (
-        reqs.loading && !reqs.data ? <Loading /> : !nReq ? <Empty icon="person-add" title="No requests" text="When someone wants to connect with you, you will see it here." action={{ title: 'Find people nearby', onPress: () => nav.navigate('Connect') }} /> :
+        reqs.loading && !reqs.data ? <SkeletonRows count={2} /> : !nReq ? <Empty icon="person-add" title="No requests" text="When someone wants to connect with you, you will see it here." action={{ title: 'Find people nearby', onPress: () => nav.navigate('Connect') }} /> :
           <View style={{ gap: 12 }}>
             {reqs.data!.requests.map((r) => (
               <Card key={r.id} style={{ gap: 12 }}>

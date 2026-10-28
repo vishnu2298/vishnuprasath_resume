@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { ApiError, api, money, timeAgo } from '../api';
 import { useLoad } from '../hooks';
-import { Avatar, Button, Card, ErrorState, Header, Input, Loading, Pill, Screen, Stars, Txt, confirmDialog, notify } from '../ui';
+import { Avatar, Button, Card, ErrorState, Header, Input, Loading, Pill, Screen, Stars, Txt, confirmDialog, notify, Skeleton } from '../ui';
 import { colors, radius, space } from '../theme';
 import { catById } from '../categories';
 import { Listing } from '../types';
@@ -25,7 +25,7 @@ export function ItemDetails() {
   const [requested, setRequested] = useState(false);
   const scroller = useRef<any>(null);
 
-  if (res.loading && !res.data) return <Screen scroll={false} header={<Header title="Item details" />}><Loading /></Screen>;
+  if (res.loading && !res.data) return <Screen header={<Header title="Item details" />}><Skeleton height={240} radius={20} /><Skeleton width="70%" height={28} style={{ marginTop: 16 }} /><Skeleton width="40%" height={34} style={{ marginTop: 12 }} /><Skeleton height={80} style={{ marginTop: 16 }} /></Screen>;
   if (!res.data) return <Screen scroll={false} header={<Header title="Item details" />}><ErrorState message={res.error || 'This item is no longer available'} retry={() => res.reload()} /></Screen>;
   const l = res.data.listing;
   const cat = catById(l.category);
@@ -123,6 +123,7 @@ export function ItemDetails() {
             <View style={{ flex: 1 }}>
               <Txt bold>{l.seller.name}{l.isMine ? ' (you)' : ''}</Txt>
               <Txt variant="small" color={colors.sub}>{l.seller.online ? 'Active now' : l.seller.city}</Txt>
+              {l.seller.isBrand ? <View style={{ marginTop: 4 }}><Pill text={`Brand · ${l.seller.brandName}`} icon="storefront" /></View> : null}
             </View>
             <Ionicons name="chevron-forward" size={26} color={colors.sub} />
           </Card>

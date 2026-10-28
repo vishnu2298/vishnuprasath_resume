@@ -1,7 +1,7 @@
 const express = require('express');
 const { HttpError, haversineKm } = require('../util');
 
-module.exports = ({ db, ser, auth }) => {
+module.exports = ({ db, ser, auth, notify }) => {
   const r = express.Router();
   const getUser = db.prepare('SELECT * FROM users WHERE id = ?');
 
@@ -68,10 +68,12 @@ module.exports = ({ db, ser, auth }) => {
     const existing = statusWith(req.user.id, other);
     if (existing.status === 'received') {
       db.prepare("UPDATE connections SET status = 'accepted' WHERE id = ?").run(existing.connectionId);
+      notify(other, { type: 'connection_accepted', title: 'You are now connected', body: `${req.user.name || 'Someone'} accepted your request`, data: { userId: req.user.id } });
       return res.json({ connection: { status: 'connected' } });
     }
     if (existing.status !== 'none') return res.json({ connection: existing });
     db.prepare('INSERT INTO connections (requester_id, addressee_id) VALUES (?,?)').run(req.user.id, other);
+    notify(other, { type: 'connection_request', title: 'New connection request', body: `${req.user.name || 'Someone'} wants to connect with you`, data: { userId: req.user.id } });
     res.status(201).json({ connection: { status: 'sent' } });
   });
 
@@ -102,7 +104,10 @@ module.exports = ({ db, ser, auth }) => {
   r.post('/connections/:id/respond', auth.required, (req, res) => {
     const c = db.prepare("SELECT * FROM connections WHERE id = ? AND addressee_id = ? AND status = 'pending'").get(req.params.id, req.user.id);
     if (!c) throw new HttpError(404, 'Request not found');
-    if (req.body.accept) db.prepare("UPDATE connections SET status = 'accepted' WHERE id = ?").run(c.id);
+    if (req.body.accept) {
+      db.prepare("UPDATE connections SET status = 'accepted' WHERE id = ?").run(c.id);
+      notify(c.requester_id, { type: 'connection_accepted', title: 'Connection accepted', body: `${req.user.name || 'Someone'} accepted your request`, data: { userId: req.user.id } });
+    }
     else db.prepare('DELETE FROM connections WHERE id = ?').run(c.id);
     res.json({ ok: true });
   });

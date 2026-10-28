@@ -4,7 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { api, timeAgo } from '../api';
 import { useAuth } from '../context';
 import { useLoad } from '../hooks';
-import { Avatar, Button, Card, ErrorState, Header, Loading, Pill, Screen, SectionTitle, Stars, Txt, confirmDialog, notify } from '../ui';
+import { Avatar, Button, Card, ErrorState, Header, Loading, Pill, Screen, SectionTitle, Stars, Txt, confirmDialog, notify, SkeletonRows, SkeletonCardGrid } from '../ui';
 import { colors } from '../theme';
 import { ConnectionState, Listing, UserFull } from '../types';
 import { ListingGrid } from '../components/ListingCard';
@@ -16,7 +16,7 @@ export function UserProfile() {
   const { id } = useRoute<any>().params;
   const { user: me } = useAuth();
   const res = useLoad(() => api<Resp>(`/users/${id}`), [id]);
-  if (res.loading && !res.data) return <Screen scroll={false} header={<Header title="Profile" />}><Loading /></Screen>;
+  if (res.loading && !res.data) return <Screen header={<Header title="Profile" />}><SkeletonRows count={1} /><View style={{ height: 16 }} /><SkeletonCardGrid count={2} /></Screen>;
   if (!res.data) return <Screen scroll={false} header={<Header title="Profile" />}><ErrorState message={res.error || 'Profile not found'} retry={() => res.reload()} /></Screen>;
   const { user: u, listings, reviews, connection, blocked, distanceKm } = res.data;
   const isMe = me?.id === u.id;

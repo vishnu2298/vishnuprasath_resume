@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { api, storage } from '../api';
 import { useLoad, useDebounced } from '../hooks';
-import { Avatar, Button, Card, Chip, Empty, ErrorState, Header, Loading, Pill, Screen, Stars, Txt, Row } from '../ui';
+import { Avatar, Button, Card, Chip, Empty, ErrorState, Header, Loading, Pill, Screen, Stars, Txt, Row, SkeletonCardGrid, SkeletonRows } from '../ui';
 import { colors, radius, space } from '../theme';
 import { CATEGORIES, CITIES, catById } from '../categories';
 import { Listing, Category, UserBrief } from '../types';
@@ -67,7 +67,7 @@ export function Listings() {
       </ScrollView>
       {city ? <View style={{ flexDirection: 'row', marginBottom: 8 }}><Pill text={`In ${city}`} icon="location" /></View> : null}
 
-      {res.loading && !res.data ? <Loading /> : res.error && !res.data ? <ErrorState message={res.error} retry={() => res.reload()} /> :
+      {res.loading && !res.data ? <SkeletonCardGrid /> : res.error && !res.data ? <ErrorState message={res.error} retry={() => res.reload()} /> :
         items.length === 0 ? <Empty icon="search" title="No items found" text="Try a different word, category or filter." action={{ title: 'Clear everything', onPress: () => { setQ(''); setCategory(undefined); setCity(undefined); setPrice(0); setSort('newest'); } }} /> : <>
           <Txt variant="small" color={colors.sub} style={{ marginVertical: 8 }}>{res.data?.total} item{res.data?.total === 1 ? '' : 's'} found</Txt>
           <ListingGrid items={items} onOpen={(l) => nav.navigate('ItemDetails', { id: l.id })}
@@ -115,7 +115,8 @@ export function Explore() {
       <Pressable accessibilityRole="search" onPress={() => nav.navigate('Search')} style={{ minHeight: 60, borderRadius: radius.pill, backgroundColor: '#fff', borderWidth: 2, borderColor: colors.line, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, gap: 12, marginBottom: space.lg }}>
         <Ionicons name="search" size={26} color={colors.primary} /><Txt color={colors.sub}>Search categories or items…</Txt>
       </Pressable>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+      <Row icon="pricetags" label="Deals from online stores" value="Top offers, updated daily" onPress={() => nav.navigate('Deals')} />
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 8 }}>
         {CATEGORIES.map((c) => (
           <Pressable key={c.id} accessibilityRole="button" accessibilityLabel={`${c.name}. ${c.hint}`} onPress={() => nav.navigate('Listings', { category: c.id })}
             style={({ pressed }) => ({ width: '47.5%', flexGrow: 1, flexBasis: '45%', backgroundColor: c.bg, borderRadius: radius.lg, padding: 16, minHeight: 150, gap: 6, opacity: pressed ? 0.9 : 1 })}>
@@ -173,7 +174,7 @@ export function Search() {
           <Txt bold style={{ marginVertical: 8 }}>Try a category</Txt>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>{CATEGORIES.map((c) => <Chip key={c.id} icon={c.icon as any} label={c.name} onPress={() => nav.replace('Listings', { category: c.id })} />)}</View>
         </View>
-      ) : busy && !results ? <Loading /> : error ? <ErrorState message={error} /> : results && results.listings.length + results.people.length === 0 ? (
+      ) : busy && !results ? <SkeletonRows count={3} /> : error ? <ErrorState message={error} /> : results && results.listings.length + results.people.length === 0 ? (
         <Empty icon="search" title="Nothing found" text={`We couldn't find anything for "${q.trim()}". Try a simpler word.`} />
       ) : results ? (
         <View style={{ marginTop: 16, gap: 8 }}>

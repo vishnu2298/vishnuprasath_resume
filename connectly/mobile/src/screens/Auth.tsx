@@ -7,6 +7,7 @@ import { Logo } from '../components/Logo';
 import { colors, space } from '../theme';
 import { useAuth } from '../context';
 import { CITIES } from '../categories';
+import { useGoogle } from './SignIn';
 
 const SLIDES = [
   { icon: 'cart', color: colors.buy, bg: colors.buySoft, title: 'Buy what you need', text: 'Find phones, furniture, bikes and more from people near you.' },
@@ -41,16 +42,23 @@ export function Onboarding() {
 
 export function Welcome() {
   const nav = useNavigation<any>();
+  const google = useGoogle();
+  const { referralCode } = useAuth();
   return (
-    <Screen scroll={false} contentStyle={{ padding: space.xl, justifyContent: 'center', gap: 20 }}>
+    <Screen contentStyle={{ padding: space.xl, justifyContent: 'center', gap: 16, flexGrow: 1 }}>
       <View style={{ alignItems: 'center', gap: 8 }}>
         <Logo size={96} />
         <Txt variant="hero" color={colors.primary}>Connectly</Txt>
         <Txt color={colors.sub} center>Buy  •  Sell  •  Connect</Txt>
       </View>
       <Txt variant="h2" center style={{ marginVertical: 8 }}>Everything you need, in one place.</Txt>
-      <Button title="Create my account" onPress={() => nav.navigate('Register')} />
-      <Button title="I already have an account" variant="secondary" onPress={() => nav.navigate('Login')} />
+      {referralCode ? <View style={{ backgroundColor: colors.buySoft, borderRadius: 14, padding: 12 }}><Txt bold color={colors.buy} center>You were invited! Code {referralCode} will be added when you sign up.</Txt></View> : null}
+      <Button title="Continue with phone" icon="call" onPress={() => nav.navigate('PhoneSignIn')} />
+      {google.available ? <Button title="Continue with Google" icon="logo-google" variant="secondary" loading={google.busy} onPress={google.run} /> : null}
+      <Button title="Use email instead" icon="mail" variant="light" onPress={() => nav.navigate('Register')} />
+      <Pressable accessibilityRole="button" onPress={() => nav.navigate('Login')} style={{ minHeight: 56, alignItems: 'center', justifyContent: 'center' }}>
+        <Txt>Already have an email account? <Txt bold color={colors.primary}>Log in</Txt></Txt>
+      </Pressable>
       <Txt variant="small" color={colors.sub} center>Simple. Safe. For everyone.</Txt>
     </Screen>
   );
@@ -95,7 +103,8 @@ export function Login() {
 export function Register() {
   const nav = useNavigation<any>();
   const { signUp } = useAuth();
-  const [f, setF] = useState({ name: '', email: '', password: '', phone: '', city: 'Chennai' });
+  const { referralCode } = useAuth();
+  const [f, setF] = useState({ name: '', email: '', password: '', phone: '', city: 'Chennai', referralCode: referralCode || '' });
   const [busy, setBusy] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const set = (k: keyof typeof f) => (v: string) => setF((p) => ({ ...p, [k]: v }));
@@ -108,7 +117,7 @@ export function Register() {
     setErrors(e);
     if (Object.keys(e).length) return;
     setBusy(true);
-    try { await signUp({ ...f, name: f.name.trim(), email: f.email.trim() }); } catch (err: any) { notify('Could not create account', err.message); setBusy(false); }
+    try { await signUp({ ...f, name: f.name.trim(), email: f.email.trim(), referralCode: f.referralCode.trim() || undefined }); } catch (err: any) { notify('Could not create account', err.message); setBusy(false); }
   };
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -117,6 +126,7 @@ export function Register() {
         <Input label="Email" value={f.email} onChangeText={set('email')} error={errors.email} autoCapitalize="none" keyboardType="email-address" autoComplete="email" placeholder="you@example.com" />
         <Input label="Password" value={f.password} onChangeText={set('password')} error={errors.password} secureTextEntry hint="At least 6 characters" placeholder="Choose a password" />
         <Input label="Phone (optional)" value={f.phone} onChangeText={set('phone')} keyboardType="phone-pad" placeholder="Only shared if you choose" />
+        <Input label="Invite code (optional)" value={f.referralCode} onChangeText={(v) => set('referralCode')(v.toUpperCase())} autoCapitalize="characters" placeholder="From a friend or family member" maxLength={12} />
         <Txt bold style={{ marginBottom: 8 }}>Your city</Txt>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16 }}>
           {CITIES.map((c) => <Chip key={c} label={c} selected={f.city === c} onPress={() => set('city')(c)} />)}

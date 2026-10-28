@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { api } from '../api';
 import { useAuth, useSettings } from '../context';
-import { Avatar, Button, Card, Chip, Header, Input, Row, Screen, Txt, confirmDialog, notify } from '../ui';
+import { Avatar, Button, Card, Chip, Header, Input, Row, Screen, Txt, confirmDialog, notify, toast } from '../ui';
 import { colors, TextSize } from '../theme';
 import { CITIES } from '../categories';
 import { Me } from '../types';
@@ -58,18 +58,18 @@ const SIZES: { id: TextSize; label: string }[] = [{ id: 'normal', label: 'Normal
 export function Settings() {
   const nav = useNavigation<any>();
   const { textSize, setTextSize } = useSettings();
-  const { signOut } = useAuth();
+  const { signOut, user, setUser } = useAuth();
   const [pw, setPw] = useState({ currentPassword: '', newPassword: '' });
   const [showPw, setShowPw] = useState(false);
   const [del, setDel] = useState('');
   const [showDel, setShowDel] = useState(false);
 
   const changePw = async () => {
-    try { await api('/me/password', { method: 'POST', body: pw }); setPw({ currentPassword: '', newPassword: '' }); setShowPw(false); notify('Password changed'); } catch (e: any) { notify('Could not change password', e.message); }
+    try { await api('/me/password', { method: 'POST', body: pw }); setPw({ currentPassword: '', newPassword: '' }); setShowPw(false); toast('Password changed'); } catch (e: any) { notify('Could not change password', e.message); }
   };
   const deleteAccount = async () => {
     if (!(await confirmDialog('Delete your account?', 'All your listings, chats and connections will be permanently removed.', 'Delete forever', true))) return;
-    try { await api('/me', { method: 'DELETE', body: { password: del } }); await signOut(); } catch (e: any) { notify('Could not delete account', e.message); }
+    try { await api('/me', { method: 'DELETE', body: { password: del, confirm: del } }); await signOut(); } catch (e: any) { notify('Could not delete account', e.message); }
   };
 
   return (
@@ -88,9 +88,14 @@ export function Settings() {
         <View style={{ backgroundColor: colors.bg, borderRadius: 12, padding: 12 }}><Txt>This is how your text will look. Easy to read, easy to use.</Txt></View>
       </Card>
 
+      <Card style={{ marginTop: 16, gap: 8 }}>
+        <Row icon="notifications" label="Notifications" value={user?.pushEnabled ? 'On: messages, requests and updates' : 'Off: you will still see them in the app'} onPress={async () => { try { setUser((await api<{ user: Me }>('/me', { method: 'PATCH', body: { pushEnabled: !user?.pushEnabled } })).user); toast(user?.pushEnabled ? 'Notifications turned off' : 'Notifications turned on'); } catch (e: any) { notify('Could not change', e.message); } }} />
+      </Card>
+
       <Card style={{ marginTop: 16, paddingVertical: 6 }}>
         <Row icon="person" label="Edit profile" onPress={() => nav.navigate('EditProfile')} />
-        <Row icon="key" label="Change password" onPress={() => setShowPw(!showPw)} />
+        <Row icon="gift" label="Invite friends and family" onPress={() => nav.navigate('Invite')} />
+        {user?.hasPassword ? <Row icon="key" label="Change password" onPress={() => setShowPw(!showPw)} /> : null}
         {showPw ? <View style={{ paddingBottom: 12 }}>
           <Input label="Current password" value={pw.currentPassword} onChangeText={(v) => setPw({ ...pw, currentPassword: v })} secureTextEntry />
           <Input label="New password" value={pw.newPassword} onChangeText={(v) => setPw({ ...pw, newPassword: v })} secureTextEntry hint="At least 6 characters" />
@@ -103,7 +108,7 @@ export function Settings() {
       <Card style={{ marginTop: 16 }}>
         <Row icon="trash" label="Delete my account" danger onPress={() => setShowDel(!showDel)} />
         {showDel ? <View>
-          <Input label="Enter your password to confirm" value={del} onChangeText={setDel} secureTextEntry />
+          <Input label={user?.hasPassword ? 'Enter your password to confirm' : 'Type DELETE to confirm'} value={del} onChangeText={setDel} secureTextEntry={!!user?.hasPassword} autoCapitalize="characters" />
           <Button title="Delete account permanently" variant="danger" onPress={deleteAccount} disabled={!del} />
         </View> : null}
       </Card>
@@ -160,7 +165,7 @@ export function Report() {
   const submit = async () => {
     if (!reason) { notify('Please choose a reason'); return; }
     setBusy(true);
-    try { const r = await api<{ message: string }>('/reports', { method: 'POST', body: { targetType, targetId, reason, details } }); nav.goBack(); notify('Report sent', r.message); } catch (e: any) { notify('Could not send report', e.message); } finally { setBusy(false); }
+    try { await api('/reports', { method: 'POST', body: { targetType, targetId, reason, details } }); nav.goBack(); toast('Report sent. Thank you for keeping Connectly safe.'); } catch (e: any) { notify('Could not send report', e.message); } finally { setBusy(false); }
   };
   return (
     <Screen header={<Header title="Report" />} footer={<Button title="Send report" icon="flag" variant="danger" onPress={submit} loading={busy} />}>

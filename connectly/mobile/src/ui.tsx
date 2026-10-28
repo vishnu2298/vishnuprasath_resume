@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator, Alert, Image, Platform, Pressable, RefreshControl, ScrollView, StyleProp, StyleSheet, Text, TextInput, TextInputProps, TextProps, TextStyle, View, ViewStyle,
+  ActivityIndicator, Alert, Animated, Easing, Image, Platform, Pressable, RefreshControl, ScrollView, StyleProp, StyleSheet, Text, TextInput, TextInputProps, TextProps, TextStyle, View, ViewStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -44,7 +44,7 @@ export function Button({ title, onPress, variant = 'primary', icon, loading, dis
       accessibilityState={{ disabled: !!off }}
       onPress={off ? undefined : onPress}
       style={({ pressed }) => [
-        { minHeight: compact ? 48 : TAP, borderRadius: radius.md, backgroundColor: v.bg, borderWidth: v.border ? 2 : 0, borderColor: v.border, paddingHorizontal: space.lg, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, opacity: off ? 0.5 : pressed ? 0.85 : 1 },
+        { minHeight: compact ? 48 : TAP, borderRadius: radius.md, backgroundColor: v.bg, borderWidth: v.border ? 2 : 0, borderColor: v.border, paddingHorizontal: space.lg, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8, opacity: off ? 0.5 : pressed ? 0.9 : 1, transform: [{ scale: pressed && !off ? 0.97 : 1 }] },
         style,
       ]}
     >
@@ -97,7 +97,7 @@ export function Avatar({ name, size = 52, uri }: { name: string; size?: number; 
 export function Card({ children, style, onPress, accessibilityLabel }: { children: React.ReactNode; style?: StyleProp<ViewStyle>; onPress?: () => void; accessibilityLabel?: string }) {
   const base: ViewStyle = { backgroundColor: colors.card, borderRadius: radius.lg, padding: space.lg, ...shadow };
   if (!onPress) return <View style={[base, style]}>{children}</View>;
-  return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} onPress={onPress} style={({ pressed }) => [base, style, pressed && { opacity: 0.9 }]}>{children}</Pressable>;
+  return <Pressable accessibilityRole="button" accessibilityLabel={accessibilityLabel} onPress={onPress} style={({ pressed }) => [base, style, pressed && { opacity: 0.92, transform: [{ scale: 0.985 }] }]}>{children}</Pressable>;
 }
 
 export function Stars({ rating, size = 18 }: { rating: number; size?: number }) {
@@ -212,3 +212,96 @@ export function confirmDialog(title: string, message: string, okText = 'Yes', de
 }
 
 export const styles = StyleSheet.create({ rowGap: { flexDirection: 'row', alignItems: 'center', gap: 8 } });
+
+
+/* ---------- Smoothness: skeleton loaders, entrance animation, toasts ---------- */
+// One shared pulse drives every skeleton on screen, so shimmer stays in sync and cheap.
+const pulse = new Animated.Value(0);
+let pulseUsers = 0;
+let pulseLoop: Animated.CompositeAnimation | null = null;
+function usePulse() {
+  useEffect(() => {
+    if (pulseUsers++ === 0) {
+      pulseLoop = Animated.loop(Animated.sequence([
+        Animated.timing(pulse, { toValue: 1, duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(pulse, { toValue: 0, duration: 900, easing: Easing.inOut(Easing.ease), useNativeDriver: Platform.OS !== 'web' }),
+      ]));
+      pulseLoop.start();
+    }
+    return () => { if (--pulseUsers === 0) { pulseLoop?.stop(); pulse.setValue(0); } };
+  }, []);
+  return pulse.interpolate({ inputRange: [0, 1], outputRange: [0.45, 1] });
+}
+
+/** A soft pulsing placeholder block. */
+export function Skeleton({ width = '100%', height = 16, radius: r = 10, style }: { width?: number | string; height?: number; radius?: number; style?: StyleProp<ViewStyle> }) {
+  const opacity = usePulse();
+  return <Animated.View accessibilityElementsHidden importantForAccessibility="no" style={[{ width: width as any, height, borderRadius: r, backgroundColor: '#E6E1D8', opacity }, style]} />;
+}
+
+export function SkeletonCardGrid({ count = 4 }: { count?: number }) {
+  return (
+    <View accessibilityLabel="Loading" accessibilityLiveRegion="polite" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+      {Array.from({ length: count }, (_, i) => (
+        <View key={i} style={{ width: '47.5%', flexGrow: 1, flexBasis: '45%', backgroundColor: '#fff', borderRadius: radius.lg, overflow: 'hidden' }}>
+          <Skeleton height={130} radius={0} />
+          <View style={{ padding: 12, gap: 8 }}><Skeleton height={16} /><Skeleton width="60%" height={20} /><Skeleton width="40%" height={12} /></View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+export function SkeletonRows({ count = 4, avatar = true }: { count?: number; avatar?: boolean }) {
+  return (
+    <View accessibilityLabel="Loading" accessibilityLiveRegion="polite" style={{ gap: 10 }}>
+      {Array.from({ length: count }, (_, i) => (
+        <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#fff', borderRadius: radius.lg, padding: 14 }}>
+          {avatar ? <Skeleton width={56} height={56} radius={28} /> : null}
+          <View style={{ flex: 1, gap: 8 }}><Skeleton width="55%" height={16} /><Skeleton height={12} /></View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** Content eases in (fade + small rise). Use `index` to stagger lists. */
+export function FadeIn({ children, index = 0, style }: { children: React.ReactNode; index?: number; style?: StyleProp<ViewStyle> }) {
+  const v = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(v, { toValue: 1, duration: 320, delay: Math.min(index, 8) * 50, easing: Easing.out(Easing.cubic), useNativeDriver: Platform.OS !== 'web' }).start();
+  }, [v, index]);
+  return <Animated.View style={[{ opacity: v, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }] }, style]}>{children}</Animated.View>;
+}
+
+type ToastMsg = { id: number; text: string; kind: 'ok' | 'info' };
+let toastHost: ((m: ToastMsg) => void) | null = null;
+let toastId = 0;
+/** Friendly, non-blocking confirmation (replaces pop-up alerts for good news). */
+export function toast(text: string, kind: 'ok' | 'info' = 'ok') {
+  if (toastHost) toastHost({ id: ++toastId, text, kind });
+  else notify(text);
+}
+
+export function ToastHost() {
+  const [msg, setMsg] = useState<ToastMsg | null>(null);
+  const v = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  useEffect(() => { toastHost = setMsg; return () => { toastHost = null; }; }, []);
+  useEffect(() => {
+    if (!msg) return;
+    Animated.timing(v, { toValue: 1, duration: 220, useNativeDriver: Platform.OS !== 'web' }).start();
+    const t = setTimeout(() => Animated.timing(v, { toValue: 0, duration: 220, useNativeDriver: Platform.OS !== 'web' }).start(() => setMsg((m) => (m?.id === msg.id ? null : m))), 3200);
+    return () => clearTimeout(t);
+  }, [msg, v]);
+  if (!msg) return null;
+  return (
+    <Animated.View pointerEvents="none" accessibilityRole="alert" accessibilityLiveRegion="polite"
+      style={{ position: 'absolute', left: 16, right: 16, bottom: insets.bottom + 96, alignItems: 'center', opacity: v, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#1F2A37', borderRadius: radius.pill, paddingVertical: 14, paddingHorizontal: 20, maxWidth: 440, ...shadow }}>
+        <Ionicons name={msg.kind === 'ok' ? 'checkmark-circle' : 'information-circle'} size={24} color={msg.kind === 'ok' ? '#6EE7A8' : '#9CC2FF'} />
+        <Txt color="#fff" bold style={{ flexShrink: 1 }}>{msg.text}</Txt>
+      </View>
+    </Animated.View>
+  );
+}

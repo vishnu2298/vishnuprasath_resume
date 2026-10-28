@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Providers } from './src/context';
 import { RootNavigator } from './src/navigation';
+import { ToastHost } from './src/ui';
 
 export default function App() {
   const content = (
@@ -11,6 +12,7 @@ export default function App() {
       <Providers>
         <StatusBar style="dark" />
         <RootNavigator />
+        <ToastHost />
       </Providers>
     </SafeAreaProvider>
   );

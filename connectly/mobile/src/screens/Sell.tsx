@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { api, imageUrl, money } from '../api';
-import { Button, Chip, Header, Input, Loading, Screen, Txt, notify } from '../ui';
+import { Button, Chip, Header, Input, Loading, Screen, Txt, notify, toast } from '../ui';
 import { colors, radius, space } from '../theme';
 import { CATEGORIES, CITIES, CONDITIONS } from '../categories';
 import { Listing } from '../types';
@@ -75,7 +75,7 @@ export function SellItem() {
       const body = { ...f, title: f.title.trim(), price, images };
       const r = editId ? await api<{ listing: Listing }>(`/listings/${editId}`, { method: 'PATCH', body }) : await api<{ listing: Listing }>('/listings', { method: 'POST', body });
       if (editId) nav.goBack(); else nav.replace('ItemDetails', { id: r.listing.id });
-      notify(editId ? 'Changes saved' : 'Your item is live!', editId ? undefined : 'People nearby can now see it.');
+      toast(editId ? 'Changes saved' : 'Your item is live. People nearby can see it now.');
     } catch (err: any) { notify('Could not list item', err.message); } finally { setBusy(false); }
   };
 

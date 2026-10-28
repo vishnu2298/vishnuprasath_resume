@@ -15,10 +15,12 @@ function makeSerializers(db) {
     const r = ratingStmt.get(u.id);
     const base = {
       id: u.id,
-      name: u.name,
+      name: u.name || 'New member',
       city: u.city,
       avatar: u.avatar || '',
       verified: !!u.verified,
+      isBrand: u.account_type === 'brand',
+      brandName: u.account_type === 'brand' ? u.brand_name : '',
       rating: r.avg,
       reviewCount: r.n,
       online: Date.now() - parseTs(u.last_seen) < ONLINE_MS,
@@ -36,7 +38,10 @@ function makeSerializers(db) {
   }
 
   function me(u) {
-    return { ...user(u, { full: true }), email: u.email, phone: u.phone, lat: u.lat, lng: u.lng };
+    return {
+      ...user(u, { full: true }), email: u.email || '', phone: u.phone, lat: u.lat, lng: u.lng,
+      hasPassword: !!u.password_hash, commissionRate: u.account_type === 'brand' ? u.commission_rate : 0, authProvider: u.auth_provider, pushEnabled: !!u.push_enabled, needsProfile: !u.name,
+    };
   }
 
   function listing(l, viewer) {

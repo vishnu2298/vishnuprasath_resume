@@ -7,8 +7,8 @@ import { createGlowTexture, createLaptopScreen, createMonitorScreen } from "./sc
 import { codeSnippets } from "@/data/code";
 import { worldState } from "@/lib/world";
 
-const metal = { color: "#17171b", roughness: 0.45, metalness: 0.6 } as const;
-const matte = { color: "#141417", roughness: 0.85, metalness: 0.1 } as const;
+const metal = { color: "#1c252c", roughness: 0.45, metalness: 0.6 } as const;
+const matte = { color: "#151d23", roughness: 0.85, metalness: 0.1 } as const;
 
 /** Curved monitor: an open cylinder arc showing the live architecture. */
 function Monitor() {
@@ -78,12 +78,12 @@ function Laptop() {
     <group position={[0.82, 0.78, 0.12]} rotation={[0, -0.45, 0]}>
       <mesh position={[0, 0.006, 0]}>
         <boxGeometry args={[0.46, 0.012, 0.32]} />
-        <meshStandardMaterial color="#2a2a2f" roughness={0.35} metalness={0.7} />
+        <meshStandardMaterial color="#2c3740" roughness={0.35} metalness={0.7} />
       </mesh>
       <group position={[0, 0.012, -0.16]} rotation={[-0.32, 0, 0]}>
         <mesh position={[0, 0.15, 0]}>
           <boxGeometry args={[0.46, 0.3, 0.008]} />
-          <meshStandardMaterial color="#2a2a2f" roughness={0.35} metalness={0.7} />
+          <meshStandardMaterial color="#2c3740" roughness={0.35} metalness={0.7} />
         </mesh>
         <mesh position={[0, 0.15, 0.0045]}>
           <planeGeometry args={[0.43, 0.27]} />
@@ -99,7 +99,6 @@ function Keyboard() {
   const ref = useRef<THREE.InstancedMesh>(null);
   const cols = 15;
   const rows = 5;
-  const accentKeys = useMemo(() => new Set([0, 14, 31, 47, 62]), []);
   useEffect(() => {
     const m = new THREE.Matrix4();
     const c = new THREE.Color();
@@ -108,18 +107,18 @@ function Keyboard() {
       for (let k = 0; k < cols; k++) {
         m.makeTranslation(-0.21 + k * 0.03, 0.012, -0.06 + r * 0.03);
         ref.current!.setMatrixAt(i, m);
-        ref.current!.setColorAt(i, c.set(accentKeys.has(i) ? "#ff5a1f" : "#26262b"));
+        ref.current!.setColorAt(i, c.set(i === 62 ? "#3d5a5d" : "#28323a"));
         i++;
       }
     }
     ref.current!.instanceMatrix.needsUpdate = true;
     if (ref.current!.instanceColor) ref.current!.instanceColor.needsUpdate = true;
-  }, [accentKeys]);
+  }, []);
   return (
     <group position={[-0.05, 0.765, 0.22]}>
       <mesh>
         <boxGeometry args={[0.48, 0.016, 0.17]} />
-        <meshStandardMaterial color="#101013" roughness={0.6} metalness={0.4} />
+        <meshStandardMaterial color="#111920" roughness={0.6} metalness={0.4} />
       </mesh>
       <instancedMesh ref={ref} args={[undefined, undefined, cols * rows]}>
         <boxGeometry args={[0.025, 0.012, 0.025]} />
@@ -151,13 +150,13 @@ function Lamp({ glow }: { glow: THREE.Texture }) {
         </mesh>
         <mesh position={[0, -0.03, 0]}>
           <sphereGeometry args={[0.025, 16, 16]} />
-          <meshBasicMaterial color="#ffd9b0" toneMapped={false} />
+          <meshBasicMaterial color="#f6efe2" toneMapped={false} />
         </mesh>
       </group>
       <sprite position={[0.34, 0.3, 0]} scale={[0.5, 0.5, 0.5]}>
-        <spriteMaterial map={glow} transparent depthWrite={false} blending={THREE.AdditiveBlending} opacity={0.55} />
+        <spriteMaterial map={glow} transparent depthWrite={false} blending={THREE.AdditiveBlending} opacity={0.35} />
       </sprite>
-      <pointLight position={[0.36, 0.24, 0.05]} color="#ffb070" intensity={2.4} distance={2.4} decay={1.4} />
+      <pointLight position={[0.36, 0.24, 0.05]} color="#f3e7d3" intensity={1.6} distance={2.2} decay={1.4} />
     </group>
   );
 }
@@ -167,12 +166,7 @@ function Desk() {
     <group>
       <mesh position={[0, 0.735, 0]}>
         <boxGeometry args={[2.5, 0.04, 0.95]} />
-        <meshStandardMaterial color="#1a1918" roughness={0.6} metalness={0.15} />
-      </mesh>
-      {/* Accent light strip along the front edge */}
-      <mesh position={[0, 0.712, 0.476]}>
-        <boxGeometry args={[2.46, 0.006, 0.006]} />
-        <meshBasicMaterial color="#ff5a1f" toneMapped={false} />
+        <meshStandardMaterial color="#262c31" roughness={0.62} metalness={0.12} />
       </mesh>
       {[-1.15, 1.15].map((x) => (
         <group key={x} position={[x, 0, 0]}>
@@ -206,11 +200,11 @@ function ServerRack() {
     if (!leds.current) return;
     leds.current.children.forEach((c, i) => {
       const m = (c as THREE.Mesh).material as THREE.MeshBasicMaterial;
-      m.opacity = 0.35 + 0.65 * (Math.sin(clock.elapsedTime * (1.3 + i * 0.37) + i) > 0.2 ? 1 : 0.2);
+      m.opacity = 0.25 + 0.45 * (Math.sin(clock.elapsedTime * (1.3 + i * 0.37) + i) > 0.2 ? 1 : 0.2);
     });
   });
   return (
-    <group position={[-3.1, 0, -2.1]} rotation={[0, 0.5, 0]}>
+    <group position={[2.7, 0, -2.5]} rotation={[0, -0.45, 0]}>
       <mesh position={[0, 1.05, 0]}>
         <boxGeometry args={[0.7, 2.1, 0.7]} />
         <meshStandardMaterial {...matte} />
@@ -219,14 +213,14 @@ function ServerRack() {
         {Array.from({ length: 10 }).map((_, i) => (
           <mesh key={i} position={[-0.2 + (i % 2) * 0.08, 0.3 + i * 0.17, 0.352]}>
             <planeGeometry args={[0.04, 0.012]} />
-            <meshBasicMaterial color={i % 3 === 0 ? "#ff3d2e" : "#ff8a3d"} transparent toneMapped={false} />
+            <meshBasicMaterial color={i % 3 === 0 ? "#a7c7d9" : "#63b7ae"} transparent toneMapped={false} />
           </mesh>
         ))}
       </group>
       {Array.from({ length: 10 }).map((_, i) => (
         <mesh key={i} position={[0.06, 0.3 + i * 0.17, 0.352]}>
           <planeGeometry args={[0.45, 0.004]} />
-          <meshBasicMaterial color="#2a2a30" />
+          <meshBasicMaterial color="#26313a" />
         </mesh>
       ))}
     </group>
@@ -238,17 +232,17 @@ function Floor({ tier }: { tier: "high" | "low" }) {
     <group>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -6]}>
         <planeGeometry args={[80, 80]} />
-        <meshStandardMaterial color="#09090b" roughness={0.92} metalness={0.05} />
+        <meshStandardMaterial color="#0e151b" roughness={0.92} metalness={0.05} />
       </mesh>
       {tier === "high" && (
-        <gridHelper args={[60, 60, "#1f1410", "#1a1210"]} position={[0, 0.002, -6]} />
+        <gridHelper args={[60, 60, "#18232c", "#141e26"]} position={[0, 0.002, -6]} />
       )}
     </group>
   );
 }
 
 export function Workstation({ tier }: { tier: "high" | "low" }) {
-  const glow = useMemo(() => createGlowTexture(), []);
+  const glow = useMemo(() => createGlowTexture("rgba(246,239,226,1)", "rgba(246,239,226,0)"), []);
   return (
     <group>
       <Floor tier={tier} />

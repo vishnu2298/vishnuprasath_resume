@@ -27,8 +27,8 @@ export function TechGalaxy() {
   }, [active]);
 
   const fallback = (
-    <div className="grid h-full place-items-center text-center font-mono text-xs uppercase tracking-[0.2em] text-dim">
-      Loading constellation…
+    <div className="grid h-full place-items-center text-center text-sm text-dim">
+      Loading the map…
     </div>
   );
 
@@ -37,7 +37,7 @@ export function TechGalaxy() {
       <div className="panel relative overflow-hidden">
         <InteractiveStage
           className="h-[440px] md:h-[600px]"
-          label="Interactive constellation of technologies. Use the category and technology lists to explore it with a keyboard."
+          label="Interactive map of technologies. Use the category and technology lists to explore it with a keyboard."
           fallback={fallback}
         >
           {(visible) => (
@@ -52,8 +52,8 @@ export function TechGalaxy() {
             />
           )}
         </InteractiveStage>
-        <p className="pointer-events-none absolute bottom-4 left-5 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-dim">
-          Hover or tap a node · drag to rotate
+        <p className="pointer-events-none absolute bottom-4 left-5 text-xs text-dim">
+          Hover or tap a technology · drag to rotate
         </p>
       </div>
 
@@ -68,7 +68,7 @@ export function TechGalaxy() {
                   key={c.id}
                   aria-pressed={on}
                   onClick={() => setCategory(on ? null : c.id)}
-                  className={`chip transition-colors ${on ? "border-accent bg-accent/15" : "hover:border-white/30"}`}
+                  className={`chip transition-colors ${on ? "border-accent bg-accent/15" : "hover:border-ice/40"}`}
                 >
                   <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: c.color }} />
                   {c.label}
@@ -84,10 +84,10 @@ export function TechGalaxy() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="eyebrow mb-2">{galaxyCategories.find((c) => c.id === byId[active].category)?.label}</p>
-                  <p className="heading text-2xl">{byId[active].label}</p>
+                  <p className="heading text-[1.6rem]">{byId[active].label}</p>
                 </div>
                 {selected && (
-                  <button aria-label="Clear selection" onClick={() => setSelected(null)} className="rounded-full p-1.5 text-muted hover:text-fg">
+                  <button aria-label="Clear selection" onClick={() => setSelected(null)} className="rounded-md p-1.5 text-muted hover:text-fg">
                     <X size={16} />
                   </button>
                 )}

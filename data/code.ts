@@ -1,21 +1,5 @@
-/** Illustrative snippets for the 3D screens. Written for the portfolio — not production code. */
+/** Illustrative code for the laptop screen in the 3D scene. Written for the portfolio — not production code. */
 export const codeSnippets = {
-  route: [
-    "app.get('/products', async (req, res) => {",
-    "  const products = await productService",
-    "    .search(req.query);",
-    "  return res.json(products);",
-    "});",
-  ],
-  recommend: [
-    "const recommendations =",
-    "  await recommendationEngine",
-    "    .generate(userId);",
-  ],
-  enrich: [
-    "const enrichedProduct =",
-    "  await aiService.enrich(product);",
-  ],
   laptop: [
     "// services/search.service.ts",
     "export async function search(query) {",

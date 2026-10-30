@@ -34,7 +34,7 @@ export function WorldLoader() {
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(60% 50% at 75% 55%, rgba(255,90,31,0.20), transparent 70%), radial-gradient(40% 40% at 90% 90%, rgba(255,61,46,0.18), transparent 70%), #070709",
+            "radial-gradient(55% 50% at 72% 52%, rgba(99,183,174,0.10), transparent 70%), radial-gradient(40% 40% at 90% 85%, rgba(167,199,217,0.08), transparent 70%), #101820",
         }}
       />
       {mount && (
@@ -47,14 +47,14 @@ export function WorldLoader() {
       {/* Phones: keep the lower two-thirds calm for hero text. */}
       <div
         className="absolute inset-0 md:hidden"
-        style={{ background: "linear-gradient(0deg, rgba(7,7,9,0.96) 0%, rgba(7,7,9,0.9) 48%, rgba(7,7,9,0) 72%)" }}
+        style={{ background: "linear-gradient(0deg, rgba(16,24,32,0.96) 0%, rgba(16,24,32,0.9) 48%, rgba(16,24,32,0) 72%)" }}
       />
       {/* Permanent vignette so edges and the text column stay calm. */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(90deg, rgba(7,7,9,0.85) 0%, rgba(7,7,9,0.35) 38%, rgba(7,7,9,0) 60%), linear-gradient(0deg, rgba(7,7,9,0.9) 0%, rgba(7,7,9,0) 30%)",
+            "linear-gradient(90deg, rgba(16,24,32,0.85) 0%, rgba(16,24,32,0.35) 38%, rgba(16,24,32,0) 60%), linear-gradient(0deg, rgba(16,24,32,0.9) 0%, rgba(16,24,32,0) 30%)",
         }}
       />
     </div>

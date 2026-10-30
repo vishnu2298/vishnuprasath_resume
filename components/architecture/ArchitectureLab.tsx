@@ -20,7 +20,7 @@ export function ArchitectureLab() {
   const [spin, setSpin] = useState(0);
 
   const ctrl =
-    "grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-ink/80 text-muted transition-colors hover:border-accent hover:text-fg";
+    "grid h-10 w-10 place-items-center rounded-lg border border-[var(--line-strong)] bg-ink/80 text-muted transition-colors hover:border-accent hover:text-fg";
 
   return (
     <div className="grid gap-6 lg:grid-cols-[20rem_1fr]">
@@ -35,12 +35,12 @@ export function ArchitectureLab() {
                 aria-checked={on}
                 onClick={() => setPattern(id)}
                 className={`panel flex items-center justify-between px-5 py-4 text-left transition-colors ${
-                  on ? "border-accent/60 bg-accent/[0.08]" : "hover:border-white/20"
+                  on ? "border-accent/60 bg-accent/[0.1]" : "hover:border-ice/30"
                 }`}
               >
                 <span>
-                  <span className="mr-3 font-mono text-xs text-accent">0{i + 1}</span>
-                  <span className="heading text-lg">{architecturePatterns[id].label}</span>
+                  <span className="mr-3 font-mono text-xs text-dim">{i + 1}</span>
+                  <span className="heading text-[1.2rem]">{architecturePatterns[id].label}</span>
                 </span>
                 {i < order.length - 1 && <span aria-hidden className="font-mono text-xs text-dim">→</span>}
               </button>
@@ -59,7 +59,7 @@ export function ArchitectureLab() {
         <InteractiveStage
           className="h-[460px] md:h-[620px]"
           label={`3D architecture diagram: ${architecturePatterns[pattern].label}. ${patterns[pattern].flow.join(" to ")}.`}
-          fallback={<div className="grid h-full place-items-center font-mono text-xs uppercase tracking-[0.2em] text-dim">Loading lab…</div>}
+          fallback={<div className="grid h-full place-items-center text-sm text-dim">Loading the model…</div>}
         >
           {(visible) => (
             <ArchitectureScene
@@ -87,7 +87,7 @@ export function ArchitectureLab() {
             <Plus size={16} />
           </button>
         </div>
-        <p className="pointer-events-none absolute left-5 top-4 font-mono text-[0.62rem] uppercase tracking-[0.2em] text-dim">
+        <p className="pointer-events-none absolute left-5 top-4 text-xs text-dim">
           {coarse ? "Use the controls to rotate & zoom" : "Drag to orbit · controls to zoom"}
         </p>
       </div>

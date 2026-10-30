@@ -5,11 +5,12 @@ import * as THREE from "three";
 import { CameraRig } from "./CameraRig";
 import { FrameDriver } from "./FrameDriver";
 import { Workstation } from "./Workstation";
-import { Avatar } from "./Avatar";
-import { AICore, Atmosphere, Constellation, DeskSymbols, FloatingCode, LabRoom, ProjectWall } from "./WorldObjects";
 import type { Tier } from "@/lib/device";
 
-/** The background world. Loaded lazily, never blocks first paint, never receives pointer events. */
+/**
+ * The background world: one quiet workstation whose monitor shows the request path I build around.
+ * Loaded lazily, never blocks first paint, never receives pointer events.
+ */
 export default function World({ tier, reducedMotion, onReady }: { tier: Tier; reducedMotion: boolean; onReady?: () => void }) {
   const high = tier === "high";
   return (
@@ -20,34 +21,25 @@ export default function World({ tier, reducedMotion, onReady }: { tier: Tier; re
       camera={{ fov: 38, near: 0.1, far: 70, position: [2.4, 1.75, 4.9] }}
       onCreated={({ gl }) => {
         gl.toneMapping = THREE.ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.05;
+        gl.toneMappingExposure = 1.0;
         onReady?.();
       }}
       aria-hidden
       tabIndex={-1}
     >
-      <color attach="background" args={["#070709"]} />
-      <fog attach="fog" args={["#070709", 8, 26]} />
+      <color attach="background" args={["#101820"]} />
+      <fog attach="fog" args={["#101820", 7, 22]} />
       <FrameDriver reducedMotion={reducedMotion} />
       <CameraRig reducedMotion={reducedMotion} />
 
-      {/* Lighting: low ambient, warm key, strong orange/red rims. */}
-      <ambientLight intensity={0.22} color="#ffe7d6" />
-      <directionalLight position={[3, 5, 4]} intensity={0.7} color="#fff1e6" />
-      <pointLight position={[2.8, 2.4, -1.6]} intensity={9} distance={9} decay={1.6} color="#ff5a1f" />
-      <pointLight position={[-3, 1.8, -2.6]} intensity={7} distance={8} decay={1.6} color="#ff2d1a" />
-      <pointLight position={[0, 1.4, 0.8]} intensity={1.2} distance={3} decay={1.6} color="#ffd0a8" />
-      <pointLight position={[2.9, 2.0, 2.4]} intensity={2.6} distance={4.5} decay={1.6} color="#ffe2c8" />
+      {/* Cool, low-contrast lighting: neutral key, teal and ice rims. */}
+      <hemisphereLight args={["#c9dbe6", "#0d141a", 0.35]} />
+      <directionalLight position={[3, 5, 4]} intensity={0.75} color="#eef3f5" />
+      <pointLight position={[2.8, 2.4, -1.6]} intensity={5} distance={9} decay={1.6} color="#63b7ae" />
+      <pointLight position={[-3, 1.8, -2.6]} intensity={4} distance={8} decay={1.6} color="#a7c7d9" />
+      <pointLight position={[2.9, 2.0, 2.4]} intensity={1.6} distance={4.5} decay={1.6} color="#e7eef2" />
 
       <Workstation tier={tier} />
-      <Avatar reducedMotion={reducedMotion} />
-      <FloatingCode reducedMotion={reducedMotion} />
-      <DeskSymbols reducedMotion={reducedMotion} />
-      <Constellation count={high ? 28 : 16} />
-      <ProjectWall />
-      <AICore tier={tier} />
-      <LabRoom />
-      <Atmosphere particles={high ? 420 : 120} reducedMotion={reducedMotion} />
     </Canvas>
   );
 }

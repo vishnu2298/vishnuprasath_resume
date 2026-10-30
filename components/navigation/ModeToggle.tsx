@@ -2,17 +2,21 @@
 
 import { useMode } from "@/components/providers/ModeProvider";
 
-export function ModeToggle({ compact = false }: { compact?: boolean }) {
+/** Switch between the portfolio and the printable résumé. */
+export function ModeToggle() {
   const { mode, setMode } = useMode();
+  const light = mode === "resume";
   const options = [
-    { id: "experience" as const, label: compact ? "3D" : "Experience" },
-    { id: "resume" as const, label: compact ? "CV" : "Resume" },
+    { id: "experience" as const, label: "Portfolio" },
+    { id: "resume" as const, label: "Résumé" },
   ];
   return (
     <div
       role="radiogroup"
       aria-label="View mode"
-      className="relative flex items-center rounded-full border border-white/10 bg-black/50 p-1 font-mono text-[0.66rem] uppercase tracking-[0.16em]"
+      className={`flex items-center rounded-[9px] border p-0.5 text-[0.8rem] ${
+        light ? "border-[#d3dbe0] bg-white" : "border-[var(--line-strong)] bg-ink/60"
+      }`}
     >
       {options.map((o) => {
         const active = mode === o.id;
@@ -22,12 +26,17 @@ export function ModeToggle({ compact = false }: { compact?: boolean }) {
             role="radio"
             aria-checked={active}
             onClick={() => setMode(o.id)}
-            className={`relative rounded-full px-3 py-1.5 transition-colors ${
-              active ? "bg-fg text-ink" : "text-muted hover:text-fg"
+            className={`rounded-[7px] px-3 py-1.5 transition-colors ${
+              active
+                ? light
+                  ? "bg-[#1b2630] text-white"
+                  : "bg-fg text-ink"
+                : light
+                  ? "text-[#5b6b77] hover:text-[#1b2630]"
+                  : "text-muted hover:text-fg"
             }`}
           >
             {o.label}
-            {!compact && <span className="sr-only"> mode</span>}
           </button>
         );
       })}

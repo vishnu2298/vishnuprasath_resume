@@ -58,7 +58,7 @@ function Graph({ active, focusCategory, onHover, onSelect, reducedMotion }: Omit
   const userRot = useRef(0);
 
   const labels = useMemo(
-    () => galaxyNodes.map((n) => makeLabel(n.label, { size: 40, weight: n.core ? 700 : 500, color: "#f4f1ec" })),
+    () => galaxyNodes.map((n) => makeLabel(n.label, { size: 40, weight: n.core ? 700 : 500, color: "#f1f2ee" })),
     [],
   );
   useEffect(() => () => labels.forEach((l) => l.texture.dispose()), [labels]);
@@ -96,11 +96,11 @@ function Graph({ active, focusCategory, onHover, onSelect, reducedMotion }: Omit
       if (mesh) mesh.scale.setScalar(n.id === active ? 1.6 : 1);
     });
     const colors = edgeGeo.attributes.color as THREE.BufferAttribute;
-    const hot = new THREE.Color("#ff5a1f");
-    const cold = new THREE.Color("#3a2a22");
+    const hot = new THREE.Color("#63b7ae");
+    const cold = new THREE.Color("#25343e");
     galaxyEdges.forEach(([a, b], i) => {
       const on = active ? a === active || b === active : focusCategory ? lit(a) && lit(b) : false;
-      const c = on ? hot : active || focusCategory ? new THREE.Color("#1c1614") : cold;
+      const c = on ? hot : active || focusCategory ? new THREE.Color("#18232b") : cold;
       colors.setXYZ(i * 2, c.r, c.g, c.b);
       colors.setXYZ(i * 2 + 1, c.r, c.g, c.b);
     });

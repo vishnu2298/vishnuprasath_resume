@@ -1,0 +1,4 @@
+User-Agent: *
+Allow: /
+
+Sitemap: https://vishnu2298.github.io/vishnuprasath_resume/sitemap.xml
